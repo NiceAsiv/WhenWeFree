@@ -1,3 +1,9 @@
+export interface CustomTimeSlot {
+    label: string;        // 如 "下午 4-5"
+    startTime: string;    // HH:mm format, 如 "16:00"
+    endTime: string;      // HH:mm format, 如 "17:00"
+}
+
 export interface Event {
     id: string;
     title: string;
@@ -5,10 +11,13 @@ export interface Event {
     timezone: string;
     startDate: Date;
     endDate: Date;
-    dayStartTime: string;
-    dayEndTime: string;
-    slotMinutes: number;
-    minDurationMinutes: number;
+    mode: 'timeRange' | 'fullDay';
+    timeMode: 'standard' | 'period' | 'custom';
+    dayStartTime: string | null;
+    dayEndTime: string | null;
+    slotMinutes: number | null;
+    minDurationMinutes: number | null;
+    customTimeSlots: CustomTimeSlot[] | null;
     adminToken: string;
     createdAt: Date;
     updatedAt: Date;
@@ -38,8 +47,11 @@ export interface EventFormData {
     timezone: string;
     startDate: string;
     endDate: string;
-    dayStartTime: string;
-    dayEndTime: string;
-    slotMinutes: number;
-    minDurationMinutes: number;
+    mode: 'timeRange' | 'fullDay';
+    timeMode?: 'standard' | 'period' | 'custom';
+    dayStartTime?: string;
+    dayEndTime?: string;
+    slotMinutes?: number;
+    minDurationMinutes?: number;
+    customTimeSlots?: CustomTimeSlot[];
 }

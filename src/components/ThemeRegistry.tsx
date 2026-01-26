@@ -3,45 +3,72 @@
 import { createTheme, ThemeProvider, CssBaseline } from '@mui/material';
 import { ReactNode } from 'react';
 
-// WeChat-inspired theme
+// WeChat Standard Color Guidelines (2017.03)
+const wechatColors = {
+    // Core Colors
+    green: '#1AAD19',           // WeChat Green (标准绿)
+    darkGreen: '#2BA245',       // Dark Green (深绿)
+    darkGrey: '#4D4D4D',        // Dark Grey (深灰)
+    mediumGrey: '#888888',      // Medium Grey (中灰)
+    lightGrey: '#AAAAAA',       // Light Grey (浅灰)
+    backgroundGrey: '#F1F1F1',  // Background Grey (背景灰)
+    
+    // Supporting Colors
+    blue: '#10AEFF',            // Bright Blue
+    darkBlue: '#2782D7',        // Dark Blue
+    lightGreen: '#91ED61',      // Light Green
+    yellow: '#FFBE00',          // Yellow
+    red: '#F76260',             // Red
+    darkRed: '#D84E43',         // Dark Red
+    orange: '#EA6853',          // Orange
+};
+
+// WeChat-inspired theme with official color guidelines
 const theme = createTheme({
     palette: {
         mode: 'light',
         primary: {
-            main: '#07C160',      // WeChat green
-            light: '#2DD47E',
-            dark: '#059A4C',
+            main: wechatColors.green,
+            light: wechatColors.lightGreen,
+            dark: wechatColors.darkGreen,
             contrastText: '#FFFFFF',
         },
         secondary: {
-            main: '#576B95',      // WeChat blue
-            light: '#7C8DB5',
-            dark: '#455A7F',
+            main: wechatColors.blue,
+            light: wechatColors.blue,
+            dark: wechatColors.darkBlue,
             contrastText: '#FFFFFF',
         },
         success: {
-            main: '#07C160',
-            light: '#2DD47E',
-            dark: '#059A4C',
+            main: wechatColors.green,
+            light: wechatColors.lightGreen,
+            dark: wechatColors.darkGreen,
         },
         error: {
-            main: '#FA5151',
-            light: '#FB7373',
-            dark: '#E03E3E',
+            main: wechatColors.red,
+            light: wechatColors.red,
+            dark: wechatColors.darkRed,
         },
         warning: {
-            main: '#FFC300',
-            light: '#FFD633',
-            dark: '#E6B000',
+            main: wechatColors.yellow,
+            light: wechatColors.yellow,
+            dark: '#E6A800',
+        },
+        info: {
+            main: wechatColors.blue,
+            light: wechatColors.blue,
+            dark: wechatColors.darkBlue,
         },
         background: {
-            default: '#EDEDED',   // WeChat background
+            default: wechatColors.backgroundGrey,
             paper: '#FFFFFF',
         },
         text: {
-            primary: '#191919',
-            secondary: '#8C8C8C',
+            primary: wechatColors.darkGrey,
+            secondary: wechatColors.mediumGrey,
+            disabled: wechatColors.lightGrey,
         },
+        divider: wechatColors.backgroundGrey,
     },
     typography: {
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif',
@@ -92,6 +119,7 @@ const theme = createTheme({
                     borderRadius: 8,
                     padding: '10px 24px',
                     fontSize: '1rem',
+                    transition: 'all 0.2s ease',
                 },
                 contained: {
                     boxShadow: 'none',
@@ -100,17 +128,29 @@ const theme = createTheme({
                     },
                 },
                 containedPrimary: {
-                    backgroundColor: '#07C160',
+                    backgroundColor: wechatColors.green,
                     '&:hover': {
-                        backgroundColor: '#059A4C',
+                        backgroundColor: wechatColors.darkGreen,
+                    },
+                    '&:disabled': {
+                        backgroundColor: wechatColors.lightGrey,
+                        color: '#FFFFFF',
                     },
                 },
                 outlined: {
-                    borderColor: '#E5E5E5',
-                    color: '#191919',
+                    borderColor: wechatColors.lightGrey,
+                    color: wechatColors.darkGrey,
                     '&:hover': {
-                        borderColor: '#07C160',
-                        backgroundColor: 'rgba(7, 193, 96, 0.04)',
+                        borderColor: wechatColors.green,
+                        backgroundColor: wechatColors.backgroundGrey,
+                    },
+                },
+                outlinedPrimary: {
+                    borderColor: wechatColors.green,
+                    color: wechatColors.green,
+                    '&:hover': {
+                        borderColor: wechatColors.darkGreen,
+                        backgroundColor: wechatColors.backgroundGrey,
                     },
                 },
                 sizeLarge: {
@@ -154,15 +194,15 @@ const theme = createTheme({
                 root: {
                     '& .MuiOutlinedInput-root': {
                         borderRadius: 8,
-                        backgroundColor: '#F7F7F7',
+                        backgroundColor: wechatColors.backgroundGrey,
                         '& fieldset': {
                             borderColor: 'transparent',
                         },
                         '&:hover fieldset': {
-                            borderColor: '#E5E5E5',
+                            borderColor: wechatColors.lightGrey,
                         },
                         '&.Mui-focused fieldset': {
-                            borderColor: '#07C160',
+                            borderColor: wechatColors.green,
                             borderWidth: 1,
                         },
                     },
@@ -180,7 +220,7 @@ const theme = createTheme({
         MuiTabs: {
             styleOverrides: {
                 indicator: {
-                    backgroundColor: '#07C160',
+                    backgroundColor: wechatColors.green,
                     height: 3,
                 },
             },
@@ -192,7 +232,39 @@ const theme = createTheme({
                     fontWeight: 500,
                     fontSize: '0.9375rem',
                     '&.Mui-selected': {
-                        color: '#07C160',
+                        color: wechatColors.green,
+                    },
+                },
+            },
+        },
+        MuiRadio: {
+            styleOverrides: {
+                root: {
+                    color: wechatColors.mediumGrey,
+                    '&.Mui-checked': {
+                        color: wechatColors.green,
+                    },
+                },
+            },
+        },
+        MuiCheckbox: {
+            styleOverrides: {
+                root: {
+                    color: wechatColors.mediumGrey,
+                    '&.Mui-checked': {
+                        color: wechatColors.green,
+                    },
+                },
+            },
+        },
+        MuiSwitch: {
+            styleOverrides: {
+                switchBase: {
+                    '&.Mui-checked': {
+                        color: wechatColors.green,
+                        '& + .MuiSwitch-track': {
+                            backgroundColor: wechatColors.green,
+                        },
                     },
                 },
             },

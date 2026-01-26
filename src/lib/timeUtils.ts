@@ -1,11 +1,15 @@
 import { format, addMinutes, differenceInMinutes } from "date-fns";
+import { CustomTimeSlot } from "@/types";
 
 interface Event {
     startDate: Date;
     endDate: Date;
-    dayStartTime: string;
-    dayEndTime: string;
-    slotMinutes: number;
+    mode: 'timeRange' | 'fullDay';
+    timeMode: 'standard' | 'period' | 'custom';
+    dayStartTime: string | null;
+    dayEndTime: string | null;
+    slotMinutes: number | null;
+    customTimeSlots: CustomTimeSlot[] | null;
     timezone: string;
 }
 
@@ -32,12 +36,28 @@ export function calculateSlotCounts(event: Event): number {
     const end = new Date(event.endDate);
     const days = Math.ceil(differenceInMinutes(end, start) / (60 * 24)) + 1;
 
-    const [startHour, startMin] = event.dayStartTime.split(":").map(Number);
-    const [endHour, endMin] = event.dayEndTime.split(":").map(Number);
-    const dailyMinutes = (endHour * 60 + endMin) - (startHour * 60 + startMin);
-    const slotsPerDay = Math.floor(dailyMinutes / event.slotMinutes);
+    if (event.mode === 'fullDay') {
+        return days;
+    }
 
-    return days * slotsPerDay;
+    if (event.timeMode === 'period') {
+        return days * 3; // 上午、下午、晚上
+    }
+
+    if (event.timeMode === 'custom' && event.customTimeSlots) {
+        return days * event.customTimeSlots.length;
+    }
+
+    // Standard mode
+    if (event.dayStartTime && event.dayEndTime && event.slotMinutes) {
+        const [startHour, startMin] = event.dayStartTime.split(":").map(Number);
+        const [endHour, endMin] = event.dayEndTime.split(":").map(Number);
+        const dailyMinutes = (endHour * 60 + endMin) - (startHour * 60 + startMin);
+        const slotsPerDay = Math.floor(dailyMinutes / event.slotMinutes);
+        return days * slotsPerDay;
+    }
+
+    return 0;
 }
 
 /**
@@ -48,24 +68,75 @@ export function slotIndexToDateTime(
     event: Event
 ): Date {
     const start = new Date(event.startDate);
-    const [startHour, startMin] = event.dayStartTime.split(":").map(Number);
-    const dailyMinutes = getDailyMinutes(event);
-    const slotsPerDay = Math.floor(dailyMinutes / event.slotMinutes);
+    
+    if (event.mode === 'fullDay') {
+        const dayStart = new Date(start);
+        dayStart.setDate(dayStart.getDate() + slotIndex);
+        dayStart.setHours(0, 0, 0, 0);
+        return dayStart;
+    }
 
+    const slotsPerDay = getSlotsPerDay(event);
     const dayOffset = Math.floor(slotIndex / slotsPerDay);
     const slotInDay = slotIndex % slotsPerDay;
 
     const dayStart = new Date(start);
     dayStart.setDate(dayStart.getDate() + dayOffset);
-    dayStart.setHours(startHour, startMin, 0, 0);
 
-    return addMinutes(dayStart, slotInDay * event.slotMinutes);
+    if (event.timeMode === 'period') {
+        dayStart.setHours(9, 0, 0, 0);
+        // 上午: 9-12, 下午: 12-18, 晚上: 18-22
+        const periodStarts = [9 * 60, 12 * 60, 18 * 60];
+        return addMinutes(dayStart, periodStarts[slotInDay]);
+    }
+
+    if (event.timeMode === 'custom' && event.customTimeSlots) {
+        const slot = event.customTimeSlots[slotInDay];
+        const [hour, min] = slot.startTime.split(':').map(Number);
+        dayStart.setHours(hour, min, 0, 0);
+        return dayStart;
+    }
+
+    // Standard mode
+    if (event.dayStartTime && event.slotMinutes) {
+        const [startHour, startMin] = event.dayStartTime.split(":").map(Number);
+        dayStart.setHours(startHour, startMin, 0, 0);
+        return addMinutes(dayStart, slotInDay * event.slotMinutes);
+    }
+
+    return dayStart;
+}
+
+/**
+ * Get slots per day
+ */
+function getSlotsPerDay(event: Event): number {
+    if (event.mode === 'fullDay') {
+        return 1;
+    }
+
+    if (event.timeMode === 'period') {
+        return 3;
+    }
+
+    if (event.timeMode === 'custom' && event.customTimeSlots) {
+        return event.customTimeSlots.length;
+    }
+
+    // Standard mode
+    if (event.dayStartTime && event.dayEndTime && event.slotMinutes) {
+        const dailyMinutes = getDailyMinutes(event);
+        return Math.floor(dailyMinutes / event.slotMinutes);
+    }
+
+    return 0;
 }
 
 /**
  * Get daily minutes
  */
 function getDailyMinutes(event: Event): number {
+    if (!event.dayStartTime || !event.dayEndTime) return 0;
     const [startHour, startMin] = event.dayStartTime.split(":").map(Number);
     const [endHour, endMin] = event.dayEndTime.split(":").map(Number);
     return (endHour * 60 + endMin) - (startHour * 60 + startMin);

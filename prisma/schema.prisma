@@ -17,10 +17,13 @@ model Event {
   timezone           String     // IANA timezone (e.g., "Asia/Shanghai")
   startDate          DateTime   // UTC
   endDate            DateTime   // UTC
-  dayStartTime       String     // HH:mm format (e.g., "09:00")
-  dayEndTime         String     // HH:mm format (e.g., "22:00")
-  slotMinutes        Int        // 15, 30, or 60
-  minDurationMinutes Int        // minimum meeting duration
+  mode               String     @default("timeRange") // "timeRange" or "fullDay"
+  timeMode           String     @default("standard")  // "standard", "period", or "custom"
+  dayStartTime       String?    // HH:mm format (e.g., "09:00"), for standard mode
+  dayEndTime         String?    // HH:mm format (e.g., "22:00"), for standard mode
+  slotMinutes        Int?       // 15, 30, or 60, for standard mode
+  minDurationMinutes Int?       // minimum meeting duration, for standard mode
+  customTimeSlots    Json?      // for custom mode: [{label: "下午 4-5", startTime: "16:00", endTime: "17:00"}]
   adminToken         String     @unique
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt

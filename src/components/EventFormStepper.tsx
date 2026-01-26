@@ -52,6 +52,76 @@ export default function EventFormStepper() {
     const [slotMinutes, setSlotMinutes] = useState(30);
     const [minDurationMinutes, setMinDurationMinutes] = useState(60);
 
+    // Custom time slots (for custom mode)
+    const [customTimeSlots, setCustomTimeSlots] = useState<Array<{label: string; startTime: string; endTime: string}>>([]);
+    const [newSlotLabel, setNewSlotLabel] = useState('');
+    const [newSlotStart, setNewSlotStart] = useState('09:00');
+    const [newSlotEnd, setNewSlotEnd] = useState('10:00');
+    const [customSlotError, setCustomSlotError] = useState('');
+
+    // Check if time ranges overlap
+    const checkTimeOverlap = (start1: string, end1: string, start2: string, end2: string): boolean => {
+        const timeToMinutes = (time: string) => {
+            const [h, m] = time.split(':').map(Number);
+            return h * 60 + m;
+        };
+        
+        const s1 = timeToMinutes(start1);
+        const e1 = timeToMinutes(end1);
+        const s2 = timeToMinutes(start2);
+        const e2 = timeToMinutes(end2);
+        
+        // Check if ranges overlap
+        return (s1 < e2 && e1 > s2);
+    };
+
+    // Add custom time slot with validation
+    const addCustomTimeSlot = () => {
+        setCustomSlotError('');
+        
+        if (!newSlotLabel.trim()) {
+            setCustomSlotError('请输入时间段标签');
+            return;
+        }
+        
+        if (!newSlotStart || !newSlotEnd) {
+            setCustomSlotError('请设置开始和结束时间');
+            return;
+        }
+        
+        // Check if start time is before end time
+        const timeToMinutes = (time: string) => {
+            const [h, m] = time.split(':').map(Number);
+            return h * 60 + m;
+        };
+        
+        if (timeToMinutes(newSlotStart) >= timeToMinutes(newSlotEnd)) {
+            setCustomSlotError('开始时间必须早于结束时间');
+            return;
+        }
+        
+        // Check for overlaps with existing slots
+        for (const slot of customTimeSlots) {
+            if (checkTimeOverlap(newSlotStart, newSlotEnd, slot.startTime, slot.endTime)) {
+                setCustomSlotError(`时间段与「${slot.label}」重叠，请调整时间`);
+                return;
+            }
+        }
+        
+        // All validations passed, add the slot
+        setCustomTimeSlots([...customTimeSlots, {
+            label: newSlotLabel.trim(),
+            startTime: newSlotStart,
+            endTime: newSlotEnd,
+        }]);
+        
+        // Reset form
+        setNewSlotLabel('');
+        setNewSlotStart('09:00');
+        setNewSlotEnd('10:00');
+        setCustomSlotError('');
+    };
+
     const handleNext = () => {
         if (activeStep === 0) {
             if (!title.trim()) {
@@ -76,8 +146,12 @@ export default function EventFormStepper() {
 
     const submitForm = async () => {
         const daysDiff = differenceInDays(new Date(endDate), new Date(startDate));
-        if (daysDiff > 7 || daysDiff < 0) {
-            setError('日期范围需在1-7天之间');
+        if (daysDiff < 0) {
+            setError('结束日期不能早于开始日期');
+            return;
+        }
+        if (mode === 'timeRange' && daysDiff > 13) {
+            setError('约时间段模式日期范围最多14天');
             return;
         }
 
@@ -95,12 +169,15 @@ export default function EventFormStepper() {
                     startDate,
                     endDate,
                     mode,
-                    timeMode,
-                    ...(timeMode === 'standard' && {
+                    timeMode: mode === 'timeRange' ? timeMode : undefined,
+                    ...(mode === 'timeRange' && timeMode === 'standard' && {
                         dayStartTime,
                         dayEndTime,
                         slotMinutes,
                         minDurationMinutes,
+                    }),
+                    ...(mode === 'timeRange' && timeMode === 'custom' && {
+                        customTimeSlots,
                     }),
                 }),
             });
@@ -191,8 +268,11 @@ export default function EventFormStepper() {
                                     sx={{
                                         mb: 2,
                                         cursor: 'pointer',
-                                        border: mode === 'timeRange' ? '2px solid #07C160' : '1px solid #E0E0E0',
-                                        '&:hover': { borderColor: '#07C160' },
+                                        border: mode === 'timeRange' ? 2 : 1,
+                                        borderColor: mode === 'timeRange' ? 'primary.main' : 'divider',
+                                        bgcolor: mode === 'timeRange' ? 'background.default' : 'background.paper',
+                                        transition: 'all 0.2s ease',
+                                        '&:hover': { borderColor: 'primary.main' },
                                     }}
                                     onClick={() => setMode('timeRange')}
                                 >
@@ -200,7 +280,7 @@ export default function EventFormStepper() {
                                         <Radio value="timeRange" checked={mode === 'timeRange'} />
                                         <Box sx={{ flex: 1 }}>
                                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                                                <AccessTimeIcon sx={{ fontSize: 20, color: '#07C160' }} />
+                                                <AccessTimeIcon sx={{ fontSize: 20, color: 'primary.main' }} />
                                                 <Typography variant="body1" sx={{ fontWeight: 600 }}>
                                                     约时间段
                                                 </Typography>
@@ -219,8 +299,11 @@ export default function EventFormStepper() {
                                     variant="outlined"
                                     sx={{
                                         cursor: 'pointer',
-                                        border: mode === 'fullDay' ? '2px solid #07C160' : '1px solid #E0E0E0',
-                                        '&:hover': { borderColor: '#07C160' },
+                                        border: mode === 'fullDay' ? 2 : 1,
+                                        borderColor: mode === 'fullDay' ? 'primary.main' : 'divider',
+                                        bgcolor: mode === 'fullDay' ? 'background.default' : 'background.paper',
+                                        transition: 'all 0.2s ease',
+                                        '&:hover': { borderColor: 'primary.main' },
                                     }}
                                     onClick={() => setMode('fullDay')}
                                 >
@@ -228,7 +311,7 @@ export default function EventFormStepper() {
                                         <Radio value="fullDay" checked={mode === 'fullDay'} />
                                         <Box sx={{ flex: 1 }}>
                                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                                                <CalendarTodayIcon sx={{ fontSize: 20, color: '#07C160' }} />
+                                                <CalendarTodayIcon sx={{ fontSize: 20, color: 'primary.main' }} />
                                                 <Typography variant="body1" sx={{ fontWeight: 600 }}>
                                                     约整天
                                                 </Typography>
@@ -251,7 +334,7 @@ export default function EventFormStepper() {
                             {/* Date Range */}
                             <Box>
                                 <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 500 }}>
-                                    日期范围（最多7天）
+                                    日期范围{mode === 'timeRange' ? '（最多14天）' : ''}
                                 </Typography>
                                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
                                     <Box>
@@ -279,7 +362,7 @@ export default function EventFormStepper() {
                                         />
                                     </Box>
                                 </Box>
-                                <Typography variant="caption" sx={{ mt: 1, display: 'block', color: '#07C160', fontWeight: 500 }}>
+                                <Typography variant="caption" sx={{ mt: 1, display: 'block', color: 'primary.main', fontWeight: 500 }}>
                                     ✓ 共 {getDaysCount()} 天
                                 </Typography>
                             </Box>
@@ -297,7 +380,10 @@ export default function EventFormStepper() {
                                                 variant="outlined"
                                                 sx={{
                                                     cursor: 'pointer',
-                                                    border: timeMode === 'standard' ? '2px solid #07C160' : '1px solid #E0E0E0',
+                                                    border: timeMode === 'standard' ? 2 : 1,
+                                                    borderColor: timeMode === 'standard' ? 'primary.main' : 'divider',
+                                                    bgcolor: timeMode === 'standard' ? 'background.default' : 'background.paper',
+                                                    transition: 'all 0.2s ease',
                                                 }}
                                                 onClick={() => setTimeMode('standard')}
                                             >
@@ -318,7 +404,10 @@ export default function EventFormStepper() {
                                                 variant="outlined"
                                                 sx={{
                                                     cursor: 'pointer',
-                                                    border: timeMode === 'period' ? '2px solid #07C160' : '1px solid #E0E0E0',
+                                                    border: timeMode === 'period' ? 2 : 1,
+                                                    borderColor: timeMode === 'period' ? 'primary.main' : 'divider',
+                                                    bgcolor: timeMode === 'period' ? 'background.default' : 'background.paper',
+                                                    transition: 'all 0.2s ease',
                                                 }}
                                                 onClick={() => setTimeMode('period')}
                                             >
@@ -339,7 +428,10 @@ export default function EventFormStepper() {
                                                 variant="outlined"
                                                 sx={{
                                                     cursor: 'pointer',
-                                                    border: timeMode === 'custom' ? '2px solid #07C160' : '1px solid #E0E0E0',
+                                                    border: timeMode === 'custom' ? 2 : 1,
+                                                    borderColor: timeMode === 'custom' ? 'primary.main' : 'divider',
+                                                    bgcolor: timeMode === 'custom' ? 'background.default' : 'background.paper',
+                                                    transition: 'all 0.2s ease',
                                                 }}
                                                 onClick={() => setTimeMode('custom')}
                                             >
@@ -409,6 +501,230 @@ export default function EventFormStepper() {
                                                     </Select>
                                                 </FormControl>
                                             </Stack>
+
+                                            {/* Time Slots Preview */}
+                                            <Box sx={{ mt: 3, pt: 2, borderTop: '1px solid #E0E0E0' }}>
+                                                <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 500 }}>
+                                                    时间槽预览
+                                                </Typography>
+                                                <Box sx={{ 
+                                                    display: 'flex', 
+                                                    flexWrap: 'wrap', 
+                                                    gap: 0.5,
+                                                    maxHeight: 200,
+                                                    overflowY: 'auto',
+                                                    p: 1,
+                                                    backgroundColor: 'white',
+                                                    borderRadius: 1
+                                                }}>
+                                                    {(() => {
+                                                        const [startHour, startMin] = dayStartTime.split(':').map(Number);
+                                                        const [endHour, endMin] = dayEndTime.split(':').map(Number);
+                                                        const totalMinutes = (endHour * 60 + endMin) - (startHour * 60 + startMin);
+                                                        const totalSlots = Math.floor(totalMinutes / slotMinutes);
+                                                        const displaySlots = totalSlots > 20 ? 20 : totalSlots;
+                                                        
+                                                        return (
+                                                            <>
+                                                                {Array.from({ length: displaySlots }).map((_, i) => {
+                                                                    const minutes = startHour * 60 + startMin + i * slotMinutes;
+                                                                    const hour = Math.floor(minutes / 60);
+                                                                    const min = minutes % 60;
+                                                                    return (
+                                                                        <Box
+                                                                            key={i}
+                                                                            sx={{
+                                                                                px: 1,
+                                                                                py: 0.5,
+                                                                                bgcolor: 'background.default',
+                                                                                border: 1,
+                                                                                borderColor: 'primary.main',
+                                                                                borderRadius: 0.5,
+                                                                                fontSize: '0.7rem',
+                                                                                color: 'primary.dark',
+                                                                                fontWeight: 500,
+                                                                            }}
+                                                                        >
+                                                                            {`${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`}
+                                                                        </Box>
+                                                                    );
+                                                                })}
+                                                                {totalSlots > 20 && (
+                                                                    <Box sx={{ px: 1, py: 0.5, color: 'text.secondary', fontSize: '0.7rem' }}>
+                                                                        ...等{totalSlots - 20}个
+                                                                    </Box>
+                                                                )}
+                                                            </>
+                                                        );
+                                                    })()}
+                                                </Box>
+                                                <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                                                    {(() => {
+                                                        const [startHour, startMin] = dayStartTime.split(':').map(Number);
+                                                        const [endHour, endMin] = dayEndTime.split(':').map(Number);
+                                                        const totalMinutes = (endHour * 60 + endMin) - (startHour * 60 + startMin);
+                                                        const totalSlots = Math.floor(totalMinutes / slotMinutes);
+                                                        return `共 ${getDaysCount()} 天 × ${totalSlots} 个时段 = ${getDaysCount() * totalSlots} 个选项`;
+                                                    })()}
+                                                </Typography>
+                                            </Box>
+                                        </Box>
+                                    )}
+
+                                    {/* Period Mode Preview */}
+                                    {timeMode === 'period' && (
+                                        <Box sx={{ mt: 3, p: 2.5, backgroundColor: '#F7F7F7', borderRadius: 2 }}>
+                                            <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 500 }}>
+                                                时间段预览
+                                            </Typography>
+                                            <Stack spacing={1}>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1.5, bgcolor: 'background.paper', borderRadius: 1, border: 1, borderColor: 'divider' }}>
+                                                    <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'warning.main' }} />
+                                                    <Typography variant="body2">上午 (09:00 - 12:00)</Typography>
+                                                </Box>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1.5, bgcolor: 'background.paper', borderRadius: 1, border: 1, borderColor: 'divider' }}>
+                                                    <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'info.main' }} />
+                                                    <Typography variant="body2">下午 (12:00 - 18:00)</Typography>
+                                                </Box>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1.5, bgcolor: 'background.paper', borderRadius: 1, border: 1, borderColor: 'divider' }}>
+                                                    <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'info.dark' }} />
+                                                    <Typography variant="body2">晚上 (18:00 - 22:00)</Typography>
+                                                </Box>
+                                            </Stack>
+                                            <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: 'block' }}>
+                                                共 {getDaysCount()} 天 × 3 个时段 = {getDaysCount() * 3} 个选项
+                                            </Typography>
+                                        </Box>
+                                    )}
+
+                                    {/* Custom Mode Settings */}
+                                    {timeMode === 'custom' && (
+                                        <Box sx={{ mt: 3, p: 2.5, backgroundColor: '#F7F7F7', borderRadius: 2 }}>
+                                            <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 500 }}>
+                                                自定义时间段
+                                            </Typography>
+                                            
+                                            {/* Existing slots - Preview */}
+                                            {customTimeSlots.length > 0 && (
+                                                <Box sx={{ mb: 2 }}>
+                                                    <Typography variant="caption" sx={{ mb: 1, display: 'block', fontWeight: 500, color: 'text.secondary' }}>
+                                                        已添加的时间段预览
+                                                    </Typography>
+                                                    <Stack spacing={1}>
+                                                        {customTimeSlots.map((slot, index) => (
+                                                            <Box 
+                                                                key={index}
+                                                                sx={{ 
+                                                                    display: 'flex', 
+                                                                    alignItems: 'center', 
+                                                                    gap: 1, 
+                                                                    p: 1.5, 
+                                                                    bgcolor: 'background.paper', 
+                                                                    borderRadius: 1,
+                                                                    border: 1,
+                                                                    borderColor: 'divider'
+                                                                }}
+                                                            >
+                                                                <Box 
+                                                                    sx={{ 
+                                                                        width: 8, 
+                                                                        height: 8, 
+                                                                        borderRadius: '50%', 
+                                                                        backgroundColor: `hsl(${(index * 137.5) % 360}, 70%, 60%)`,
+                                                                        flexShrink: 0
+                                                                    }} 
+                                                                />
+                                                                <Box sx={{ flex: 1 }}>
+                                                                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                                                        {slot.label}
+                                                                    </Typography>
+                                                                    <Typography variant="caption" color="text.secondary">
+                                                                        {slot.startTime} - {slot.endTime}
+                                                                    </Typography>
+                                                                </Box>
+                                                                <Button 
+                                                                    size="small" 
+                                                                    onClick={() => {
+                                                                        setCustomTimeSlots(customTimeSlots.filter((_, i) => i !== index));
+                                                                    }}
+                                                                    sx={{
+                                                                        color: 'error.main',
+                                                                        '&:hover': {
+                                                                            bgcolor: 'error.lighter',
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    删除
+                                                                </Button>
+                                                            </Box>
+                                                        ))}
+                                                    </Stack>
+                                                    <Typography variant="caption" color="text.secondary" sx={{ mt: 1.5, display: 'block' }}>
+                                                        共 {getDaysCount()} 天 × {customTimeSlots.length} 个时段 = {getDaysCount() * customTimeSlots.length} 个选项
+                                                    </Typography>
+                                                </Box>
+                                            )}
+
+                                            {/* Add new slot */}
+                                            <Box sx={{ p: 2, backgroundColor: 'white', borderRadius: 1, border: '1px dashed #E0E0E0' }}>
+                                                <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+                                                    添加新时间段
+                                                </Typography>
+                                                <Stack spacing={1.5}>
+                                                    <TextField
+                                                        size="small"
+                                                        label="标签"
+                                                        placeholder="例如：下午 4-5"
+                                                        value={newSlotLabel}
+                                                        onChange={(e) => {
+                                                            setNewSlotLabel(e.target.value);
+                                                            setCustomSlotError('');
+                                                        }}
+                                                        fullWidth
+                                                    />
+                                                    <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
+                                                        <TextField
+                                                            size="small"
+                                                            type="time"
+                                                            label="开始时间"
+                                                            value={newSlotStart}
+                                                            onChange={(e) => {
+                                                                setNewSlotStart(e.target.value);
+                                                                setCustomSlotError('');
+                                                            }}
+                                                            InputLabelProps={{ shrink: true }}
+                                                        />
+                                                        <TextField
+                                                            size="small"
+                                                            type="time"
+                                                            label="结束时间"
+                                                            value={newSlotEnd}
+                                                            onChange={(e) => {
+                                                                setNewSlotEnd(e.target.value);
+                                                                setCustomSlotError('');
+                                                            }}
+                                                            InputLabelProps={{ shrink: true }}
+                                                        />
+                                                    </Box>
+                                                    
+                                                    {/* Error message */}
+                                                    {customSlotError && (
+                                                        <Alert severity="error" sx={{ mt: 1 }}>
+                                                            {customSlotError}
+                                                        </Alert>
+                                                    )}
+                                                    
+                                                    <Button
+                                                        variant="outlined"
+                                                        size="small"
+                                                        onClick={addCustomTimeSlot}
+                                                        disabled={!newSlotLabel.trim() || !newSlotStart || !newSlotEnd}
+                                                        color="primary"
+                                                    >
+                                                        添加时间段
+                                                    </Button>
+                                                </Stack>
+                                            </Box>
                                         </Box>
                                     )}
                                 </Box>
@@ -427,7 +743,11 @@ export default function EventFormStepper() {
                 {/* Actions */}
                 <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
                     {activeStep > 0 && (
-                        <Button variant="outlined" onClick={handleBack} sx={{ minWidth: 100 }}>
+                        <Button 
+                            variant="outlined" 
+                            onClick={handleBack} 
+                            sx={{ minWidth: 100 }}
+                        >
                             上一步
                         </Button>
                     )}

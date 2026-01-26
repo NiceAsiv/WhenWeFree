@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
 import { Box, Paper, Typography } from '@mui/material';
 import { Event } from '@/types';
 import { format, addDays } from 'date-fns';
@@ -28,10 +28,43 @@ export default function TimeGrid({
     const endDate = new Date(event.endDate);
     const daysDiff = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
-    const [startHour, startMin] = event.dayStartTime.split(':').map(Number);
-    const [endHour, endMin] = event.dayEndTime.split(':').map(Number);
-    const totalMinutes = (endHour * 60 + endMin) - (startHour * 60 + startMin);
-    const slotsPerDay = Math.floor(totalMinutes / event.slotMinutes);
+    // Calculate slots per day based on mode
+    const { slotsPerDay, slotLabels } = useMemo(() => {
+        if (event.mode === 'fullDay') {
+            return { slotsPerDay: 1, slotLabels: ['全天'] };
+        }
+
+        if (event.timeMode === 'period') {
+            return {
+                slotsPerDay: 3,
+                slotLabels: ['上午\n9-12', '下午\n12-18', '晚上\n18-22']
+            };
+        }
+
+        if (event.timeMode === 'custom' && event.customTimeSlots) {
+            return {
+                slotsPerDay: event.customTimeSlots.length,
+                slotLabels: event.customTimeSlots.map(slot => `${slot.label}\n${slot.startTime}-${slot.endTime}`)
+            };
+        }
+
+        // Standard mode
+        if (event.dayStartTime && event.dayEndTime && event.slotMinutes) {
+            const [startHour, startMin] = event.dayStartTime.split(':').map(Number);
+            const [endHour, endMin] = event.dayEndTime.split(':').map(Number);
+            const totalMinutes = (endHour * 60 + endMin) - (startHour * 60 + startMin);
+            const count = Math.floor(totalMinutes / event.slotMinutes);
+            const labels = Array.from({ length: count }).map((_, i) => {
+                const minutes = startHour * 60 + startMin + i * event.slotMinutes;
+                const hour = Math.floor(minutes / 60);
+                const min = minutes % 60;
+                return `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
+            });
+            return { slotsPerDay: count, slotLabels: labels };
+        }
+
+        return { slotsPerDay: 0, slotLabels: [] };
+    }, [event]);
 
     const toggleSlot = useCallback((slotIndex: number) => {
         const isSelected = selectedSlots.includes(slotIndex);
@@ -81,6 +114,9 @@ export default function TimeGrid({
         return '';
     };
 
+    // Determine if we should show abbreviated view (more than 3 slots per day)
+    const isAbbreviated = slotsPerDay > 3;
+
     return (
         <Box onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
             <Paper
@@ -93,34 +129,33 @@ export default function TimeGrid({
             >
                 <Box sx={{ display: 'flex', minWidth: 'max-content' }}>
                     {/* Time labels column */}
-                    <Box sx={{ pr: 2, minWidth: 60 }}>
-                        <Box sx={{ height: 40 }} /> {/* Header spacer */}
-                        {Array.from({ length: slotsPerDay }).map((_, slotInDay) => {
-                            const minutes = startHour * 60 + startMin + slotInDay * event.slotMinutes;
-                            const hour = Math.floor(minutes / 60);
-                            const min = minutes % 60;
-                            return (
+                    {!isAbbreviated && (
+                        <Box sx={{ pr: 2, minWidth: event.mode === 'fullDay' ? 40 : 80 }}>
+                            <Box sx={{ height: 40 }} /> {/* Header spacer */}
+                            {slotLabels.map((label, i) => (
                                 <Box
-                                    key={slotInDay}
+                                    key={i}
                                     sx={{
-                                        height: 32,
+                                        height: isAbbreviated ? 24 : 40,
                                         display: 'flex',
                                         alignItems: 'center',
                                         fontSize: '0.75rem',
                                         color: 'text.secondary',
+                                        whiteSpace: 'pre-line',
+                                        lineHeight: 1.2,
                                     }}
                                 >
-                                    {`${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`}
+                                    {label}
                                 </Box>
-                            );
-                        })}
-                    </Box>
+                            ))}
+                        </Box>
+                    )}
 
                     {/* Grid columns for each day */}
                     {Array.from({ length: daysDiff }).map((_, dayIndex) => {
                         const currentDay = addDays(startDate, dayIndex);
                         return (
-                            <Box key={dayIndex} sx={{ minWidth: 60 }}>
+                            <Box key={dayIndex} sx={{ minWidth: isAbbreviated ? 50 : 70 }}>
                                 {/* Day header */}
                                 <Box
                                     sx={{
@@ -152,7 +187,7 @@ export default function TimeGrid({
                                             onMouseDown={() => handleMouseDown(slotIndex)}
                                             onMouseEnter={() => handleMouseEnter(slotIndex)}
                                             sx={{
-                                                height: 30,
+                                                height: isAbbreviated ? 22 : 38,
                                                 m: 0.25,
                                                 backgroundColor: getSlotColor(slotIndex),
                                                 border: '1px solid #ddd',
@@ -161,7 +196,7 @@ export default function TimeGrid({
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
-                                                fontSize: '0.75rem',
+                                                fontSize: isAbbreviated ? '0.65rem' : '0.75rem',
                                                 fontWeight: 600,
                                                 userSelect: 'none',
                                                 transition: 'all 0.15s ease',
