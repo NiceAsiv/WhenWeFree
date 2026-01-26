@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 29, 27, 32;
+  --background-rgb: 254, 247, 255;
+  --primary-rgb: 103, 80, 164;
+  --primary-container-rgb: 234, 221, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 230, 225, 229;
+    --background-rgb: 29, 27, 32;
+    --primary-rgb: 208, 188, 255;
+    --primary-container-rgb: 79, 55, 139;
+  }
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: rgb(var(--background-rgb));
+  min-height: 100vh;
+  font-feature-settings: 'kern' 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar styles - MD3 inspired */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F5EFF7;
+  border-radius: 100px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CAC4D0;
+  border-radius: 100px;
+  border: 2px solid #F5EFF7;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6750A4;
+}
+
+/* Time grid styles */
+.time-grid-cell {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+
+.time-grid-cell:hover {
+  opacity: 0.85;
+}
+
+.time-grid-cell.selected {
+  background-color: #6750A4;
+  color: white;
+}
+
+.time-grid-cell.heatmap {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Material Design 3 elevation styles */
+.elevation-1 {
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.3), 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+}
+
+.elevation-2 {
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.3), 0px 2px 6px 2px rgba(0, 0, 0, 0.15);
+}
+
+.elevation-3 {
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.3), 0px 4px 8px 3px rgba(0, 0, 0, 0.15);
+}

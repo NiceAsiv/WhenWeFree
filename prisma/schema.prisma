@@ -1,0 +1,44 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Event {
+  id                 String     @id @default(cuid())
+  title              String
+  description        String?
+  timezone           String     // IANA timezone (e.g., "Asia/Shanghai")
+  startDate          DateTime   // UTC
+  endDate            DateTime   // UTC
+  dayStartTime       String     // HH:mm format (e.g., "09:00")
+  dayEndTime         String     // HH:mm format (e.g., "22:00")
+  slotMinutes        Int        // 15, 30, or 60
+  minDurationMinutes Int        // minimum meeting duration
+  adminToken         String     @unique
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  responses          Response[]
+
+  @@index([adminToken])
+}
+
+model Response {
+  id                String   @id @default(cuid())
+  eventId           String
+  event             Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name              String?  // participant name (optional)
+  availabilitySlots Int[]    // array of slot indices
+  sessionToken      String   @unique // for allowing edits from same device
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([eventId])
+  @@index([sessionToken])
+}
