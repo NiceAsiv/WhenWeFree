@@ -122,7 +122,12 @@ export default function TimeGrid({
     const isAbbreviated = slotsPerDay > 3;
 
     return (
-        <Box onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
+        <Box 
+            onMouseUp={handleMouseUp} 
+            onMouseLeave={handleMouseUp}
+            onTouchEnd={handleMouseUp}
+            onTouchCancel={handleMouseUp}
+        >
             <Paper
                 elevation={0}
                 sx={{
@@ -229,10 +234,19 @@ export default function TimeGrid({
                                             className="time-grid-cell"
                                             onMouseDown={() => handleMouseDown(slotIndex)}
                                             onMouseEnter={() => handleMouseEnter(slotIndex)}
-                                            onTouchStart={(e) => {
-                                                e.preventDefault();
-                                                handleMouseDown(slotIndex);
+                                            onTouchStart={() => handleMouseDown(slotIndex)}
+                                            onTouchMove={(e) => {
+                                                const touch = e.touches[0];
+                                                const element = document.elementFromPoint(touch.clientX, touch.clientY);
+                                                if (element?.classList.contains('time-grid-cell')) {
+                                                    const allCells = Array.from(document.querySelectorAll('.time-grid-cell'));
+                                                    const cellIndex = allCells.indexOf(element);
+                                                    if (cellIndex >= 0) {
+                                                        handleMouseEnter(cellIndex);
+                                                    }
+                                                }
                                             }}
+                                            onTouchEnd={() => setIsDragging(false)}
                                             sx={{
                                                 height: isAbbreviated ? 26 : 42,
                                                 m: 0.5,
