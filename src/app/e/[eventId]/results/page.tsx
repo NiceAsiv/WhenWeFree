@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { notFound } from 'next/navigation';
 import { Container, Typography, Box, IconButton, CircularProgress } from "@mui/material";
 import Link from "next/link";
@@ -13,12 +13,13 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { Event, Response } from "@/types";
 
 interface ResultsPageProps {
-    params: {
+    params: Promise<{
         eventId: string;
-    };
+    }>;
 }
 
 export default function ResultsPage({ params }: ResultsPageProps) {
+    const { eventId } = use(params);
     const { t } = useTranslation();
     const [event, setEvent] = useState<(Event & { responses: Response[] }) | null>(null);
     const [loading, setLoading] = useState(true);
@@ -27,7 +28,7 @@ export default function ResultsPage({ params }: ResultsPageProps) {
     useEffect(() => {
         async function fetchEvent() {
             try {
-                const response = await fetch(`/api/events/${params.eventId}/results`);
+                const response = await fetch(`/api/events/${eventId}/results`);
                 if (response.ok) {
                     const data = await response.json();
                     setEvent(data.event);
@@ -41,7 +42,7 @@ export default function ResultsPage({ params }: ResultsPageProps) {
             }
         }
         fetchEvent();
-    }, [params.eventId]);
+    }, [eventId]);
 
     if (loading) {
         return (
@@ -61,7 +62,7 @@ export default function ResultsPage({ params }: ResultsPageProps) {
         <Container maxWidth="xl" sx={{ py: 8 }}>
             {/* Top Bar with Back, Settings and Share */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Link href={`/e/${params.eventId}`} passHref style={{ textDecoration: 'none' }}>
+                <Link href={`/e/${eventId}`} passHref style={{ textDecoration: 'none' }}>
                     <IconButton
                         sx={{
                             color: 'text.secondary',
@@ -115,7 +116,7 @@ export default function ResultsPage({ params }: ResultsPageProps) {
             <ShareDialog
                 open={shareDialogOpen}
                 onClose={() => setShareDialogOpen(false)}
-                eventId={params.eventId}
+                eventId={eventId}
                 eventTitle={event.title}
             />
         </Container>

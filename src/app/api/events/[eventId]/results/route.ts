@@ -1,15 +1,17 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { Response as EventResponse } from "@prisma/client";
+import { Response as EventResponse } from "@prisma/client"; // Keep this for Prisma Response type
+import { Event as AppEvent } from "@/types"; // Import AppEvent for type casting
 import { calculateSlotCounts, findCommonSlots, findRecommendedSlots } from "@/lib/timeUtils";
 
 export async function GET(
     request: Request,
-    { params }: { params: { eventId: string } }
+    { params }: { params: Promise<{ eventId: string }> }
 ) {
     try {
+        const { eventId } = await params;
         const event = await prisma.event.findUnique({
-            where: { id: params.eventId },
+            where: { id: eventId },
             include: {
                 responses: true,
             },
@@ -23,7 +25,9 @@ export async function GET(
         }
 
         // Calculate total number of slots
-        const totalSlots = calculateSlotCounts(event);
+        // Cast event to AppEvent to match the interface expected by calculateSlotCounts
+        // (Prisma types for enums/JSON are looser than our strict AppEvent type)
+        const totalSlots = calculateSlotCounts(event as unknown as AppEvent);
 
         // Aggregate availability data
         const slotCounts = new Array(totalSlots).fill(0);
@@ -42,8 +46,8 @@ export async function GET(
         // Find recommended slots
         const recommendedSlots = findRecommendedSlots(
             slotCounts,
-            event.slotMinutes,
-            event.minDurationMinutes
+            event.slotMinutes || 30, // Provide default if null
+            event.minDurationMinutes || 30 // Provide default if null
         );
 
         return NextResponse.json({

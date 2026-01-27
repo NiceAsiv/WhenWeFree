@@ -3,11 +3,12 @@ import prisma from "@/lib/prisma";
 
 export async function GET(
     request: Request,
-    { params }: { params: { eventId: string } }
+    { params }: { params: Promise<{ eventId: string }> }
 ) {
     try {
+        const { eventId } = await params;
         const event = await prisma.event.findUnique({
-            where: { id: params.eventId },
+            where: { id: eventId },
         });
 
         if (!event) {

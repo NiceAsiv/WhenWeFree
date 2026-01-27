@@ -10,9 +10,10 @@ function isValidEmail(email: string): boolean {
 // GET - Query response by email
 export async function GET(
     request: Request,
-    { params }: { params: { eventId: string } }
+    { params }: { params: Promise<{ eventId: string }> }
 ) {
     try {
+        const { eventId } = await params;
         const { searchParams } = new URL(request.url);
         const email = searchParams.get('email');
 
@@ -34,7 +35,7 @@ export async function GET(
         const response = await prisma.response.findUnique({
             where: {
                 eventId_email: {
-                    eventId: params.eventId,
+                    eventId: eventId,
                     email: email.trim().toLowerCase(),
                 },
             },
@@ -53,9 +54,10 @@ export async function GET(
 // POST - Create or update response
 export async function POST(
     request: Request,
-    { params }: { params: { eventId: string } }
+    { params }: { params: Promise<{ eventId: string }> }
 ) {
     try {
+        const { eventId } = await params;
         const body = await request.json();
         const { name, email, availabilitySlots } = body;
 
@@ -83,7 +85,7 @@ export async function POST(
 
         // Check if event exists
         const event = await prisma.event.findUnique({
-            where: { id: params.eventId },
+            where: { id: eventId },
         });
 
         if (!event) {
@@ -100,7 +102,7 @@ export async function POST(
         const existingResponse = await prisma.response.findUnique({
             where: {
                 eventId_email: {
-                    eventId: params.eventId,
+                    eventId: eventId,
                     email: normalizedEmail,
                 },
             },
@@ -121,7 +123,7 @@ export async function POST(
         // Create new response
         const response = await prisma.response.create({
             data: {
-                eventId: params.eventId,
+                eventId: eventId,
                 name: trimmedName,
                 email: normalizedEmail,
                 availabilitySlots,

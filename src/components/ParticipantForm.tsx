@@ -112,12 +112,13 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
             const [startHour, startMin] = event.dayStartTime.split(':').map(Number);
             const [endHour, endMin] = event.dayEndTime.split(':').map(Number);
             const totalMinutes = (endHour * 60 + endMin) - (startHour * 60 + startMin);
-            slotsPerDay = Math.floor(totalMinutes / event.slotMinutes);
+            const slotMinutes = event.slotMinutes;
+            slotsPerDay = Math.floor(totalMinutes / slotMinutes);
             getSlotLabel = (slotInDay) => {
-                const minutes = startHour * 60 + startMin + slotInDay * event.slotMinutes;
+                const minutes = startHour * 60 + startMin + slotInDay * slotMinutes;
                 const hour = Math.floor(minutes / 60);
                 const min = minutes % 60;
-                const endMinutes = minutes + event.slotMinutes;
+                const endMinutes = minutes + slotMinutes;
                 const endHour = Math.floor(endMinutes / 60);
                 const endMin = endMinutes % 60;
                 return `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}-${endHour.toString().padStart(2, '0')}:${endMin.toString().padStart(2, '0')}`;

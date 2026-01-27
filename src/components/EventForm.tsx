@@ -7,7 +7,7 @@ import {
     TextField,
     Button,
     Box,
-    Grid,
+    Stack,
     FormControl,
     InputLabel,
     Select,
@@ -27,6 +27,7 @@ export default function EventForm() {
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         startDate: new Date().toISOString().split('T')[0],
         endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        mode: 'timeRange',
         dayStartTime: '09:00',
         dayEndTime: '22:00',
         slotMinutes: 30,
@@ -70,31 +71,27 @@ export default function EventForm() {
     return (
         <Paper elevation={3} sx={{ p: 4 }}>
             <form onSubmit={handleSubmit}>
-                <Grid container spacing={3}>
-                    <Grid item xs={12}>
-                        <TextField
-                            fullWidth
-                            required
-                            label="活动标题"
-                            value={formData.title}
-                            onChange={handleChange('title')}
-                            placeholder="例如：团队周会"
-                        />
-                    </Grid>
+                <Stack spacing={3}>
+                    <TextField
+                        fullWidth
+                        required
+                        label="活动标题"
+                        value={formData.title}
+                        onChange={handleChange('title')}
+                        placeholder="例如：团队周会"
+                    />
 
-                    <Grid item xs={12}>
-                        <TextField
-                            fullWidth
-                            multiline
-                            rows={3}
-                            label="描述（可选）"
-                            value={formData.description}
-                            onChange={handleChange('description')}
-                            placeholder="添加活动描述..."
-                        />
-                    </Grid>
+                    <TextField
+                        fullWidth
+                        multiline
+                        rows={3}
+                        label="描述（可选）"
+                        value={formData.description}
+                        onChange={handleChange('description')}
+                        placeholder="添加活动描述..."
+                    />
 
-                    <Grid item xs={12} sm={6}>
+                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                         <TextField
                             fullWidth
                             required
@@ -104,9 +101,7 @@ export default function EventForm() {
                             onChange={handleChange('startDate')}
                             InputLabelProps={{ shrink: true }}
                         />
-                    </Grid>
 
-                    <Grid item xs={12} sm={6}>
                         <TextField
                             fullWidth
                             required
@@ -116,9 +111,9 @@ export default function EventForm() {
                             onChange={handleChange('endDate')}
                             InputLabelProps={{ shrink: true }}
                         />
-                    </Grid>
+                    </Stack>
 
-                    <Grid item xs={12} sm={6}>
+                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                         <TextField
                             fullWidth
                             required
@@ -128,9 +123,7 @@ export default function EventForm() {
                             onChange={handleChange('dayStartTime')}
                             InputLabelProps={{ shrink: true }}
                         />
-                    </Grid>
 
-                    <Grid item xs={12} sm={6}>
                         <TextField
                             fullWidth
                             required
@@ -140,9 +133,9 @@ export default function EventForm() {
                             onChange={handleChange('dayEndTime')}
                             InputLabelProps={{ shrink: true }}
                         />
-                    </Grid>
+                    </Stack>
 
-                    <Grid item xs={12} sm={6}>
+                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                         <FormControl fullWidth required>
                             <InputLabel>时间粒度</InputLabel>
                             <Select
@@ -155,9 +148,7 @@ export default function EventForm() {
                                 <MenuItem value={60}>60 分钟</MenuItem>
                             </Select>
                         </FormControl>
-                    </Grid>
 
-                    <Grid item xs={12} sm={6}>
                         <FormControl fullWidth required>
                             <InputLabel>最短活动时长</InputLabel>
                             <Select
@@ -171,47 +162,39 @@ export default function EventForm() {
                                 <MenuItem value={120}>120 分钟</MenuItem>
                             </Select>
                         </FormControl>
-                    </Grid>
+                    </Stack>
 
-                    <Grid item xs={12}>
-                        <TextField
-                            fullWidth
-                            required
-                            label="时区"
-                            value={formData.timezone}
-                            onChange={handleChange('timezone')}
-                            helperText="默认为浏览器时区"
-                        />
-                    </Grid>
+                    <TextField
+                        fullWidth
+                        required
+                        label="时区"
+                        value={formData.timezone}
+                        onChange={handleChange('timezone')}
+                        helperText="默认为浏览器时区"
+                    />
 
-                    {error && (
-                        <Grid item xs={12}>
-                            <Alert severity="error">{error}</Alert>
-                        </Grid>
-                    )}
+                    {error && <Alert severity="error">{error}</Alert>}
 
-                    <Grid item xs={12}>
-                        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-                            <Button
-                                type="button"
-                                variant="outlined"
-                                onClick={() => router.back()}
-                            >
-                                取消
-                            </Button>
-                            <Button
-                                type="submit"
-                                variant="contained"
-                                disabled={loading}
-                                sx={{
-                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                }}
-                            >
-                                {loading ? '创建中...' : '创建活动'}
-                            </Button>
-                        </Box>
-                    </Grid>
-                </Grid>
+                    <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+                        <Button
+                            type="button"
+                            variant="outlined"
+                            onClick={() => router.back()}
+                        >
+                            取消
+                        </Button>
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            disabled={loading}
+                            sx={{
+                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            }}
+                        >
+                            {loading ? '创建中...' : '创建活动'}
+                        </Button>
+                    </Box>
+                </Stack>
             </form>
         </Paper>
     );

@@ -7,6 +7,7 @@
 
 ## 技术栈
 
+- Node.js: 24 lts and above
 - **Frontend**: Next.js 14 (App Router) + React 18 + TypeScript
 - **UI Framework**: Material-UI + Tailwind CSS
 - **Database**: PostgreSQL with Prisma ORM

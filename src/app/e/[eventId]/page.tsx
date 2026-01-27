@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { notFound } from 'next/navigation';
 import { Container, Typography, Box, Button, IconButton, CircularProgress } from "@mui/material";
 import Link from "next/link";
@@ -13,12 +13,13 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { Event } from "@/types";
 
 interface EventPageProps {
-    params: {
+    params: Promise<{
         eventId: string;
-    };
+    }>;
 }
 
 export default function EventPage({ params }: EventPageProps) {
+    const { eventId } = use(params);
     const { t } = useTranslation();
     const [event, setEvent] = useState<Event | null>(null);
     const [loading, setLoading] = useState(true);
@@ -27,7 +28,7 @@ export default function EventPage({ params }: EventPageProps) {
     useEffect(() => {
         async function fetchEvent() {
             try {
-                const response = await fetch(`/api/events/${params.eventId}`);
+                const response = await fetch(`/api/events/${eventId}`);
                 if (response.ok) {
                     const data = await response.json();
                     setEvent(data);
@@ -41,7 +42,7 @@ export default function EventPage({ params }: EventPageProps) {
             }
         }
         fetchEvent();
-    }, [params.eventId]);
+    }, [eventId]);
 
     if (loading) {
         return (
@@ -134,7 +135,7 @@ export default function EventPage({ params }: EventPageProps) {
                         >
                             {t('eventPage.shareEvent')}
                         </Button>
-                        <Link href={`/e/${params.eventId}/results`} passHref style={{ textDecoration: 'none' }}>
+                        <Link href={`/e/${eventId}/results`} passHref style={{ textDecoration: 'none' }}>
                             <Button
                                 variant="outlined"
                                 startIcon={<BarChart />}

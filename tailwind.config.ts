@@ -26,10 +26,6 @@ const config: Config = {
         },
     },
     plugins: [],
-    // Disable Tailwind's preflight to avoid conflicts with Material-UI
-    corePlugins: {
-        preflight: false,
-    },
 };
 
 export default config;

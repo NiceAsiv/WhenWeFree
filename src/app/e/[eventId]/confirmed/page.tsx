@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, use } from 'react';
 import { Container, Typography, Box, Button, Paper } from "@mui/material";
 import Link from "next/link";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -9,12 +9,13 @@ import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import ShareDialog from "@/components/ShareDialog";
 
 interface ConfirmedPageProps {
-    params: {
+    params: Promise<{
         eventId: string;
-    };
+    }>;
 }
 
 export default function ConfirmedPage({ params }: ConfirmedPageProps) {
+    const { eventId } = use(params);
     const [shareDialogOpen, setShareDialogOpen] = useState(false);
 
     return (
@@ -77,7 +78,7 @@ export default function ConfirmedPage({ params }: ConfirmedPageProps) {
                     >
                         分享活动链接
                     </Button>
-                    <Link href={`/e/${params.eventId}`} passHref style={{ textDecoration: 'none' }}>
+                    <Link href={`/e/${eventId}`} passHref style={{ textDecoration: 'none' }}>
                         <Button
                             variant="outlined"
                             size="large"
@@ -107,7 +108,7 @@ export default function ConfirmedPage({ params }: ConfirmedPageProps) {
             <ShareDialog
                 open={shareDialogOpen}
                 onClose={() => setShareDialogOpen(false)}
-                eventId={params.eventId}
+                eventId={eventId}
                 eventTitle="活动"
             />
         </Container>
