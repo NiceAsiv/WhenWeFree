@@ -1,30 +1,42 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-// GET - Query response by name
+// Simple email validation
+function isValidEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+// GET - Query response by email
 export async function GET(
     request: Request,
     { params }: { params: { eventId: string } }
 ) {
     try {
         const { searchParams } = new URL(request.url);
-        const name = searchParams.get('name');
+        const email = searchParams.get('email');
 
-        if (!name) {
+        if (!email) {
             return NextResponse.json(
-                { error: "缺少昵称参数" },
+                { error: "缺少邮箱参数" },
                 { status: 400 }
             );
         }
 
-        // Find response by event ID and name
-        const response = await prisma.response.findFirst({
+        if (!isValidEmail(email)) {
+            return NextResponse.json(
+                { error: "邮箱格式不正确" },
+                { status: 400 }
+            );
+        }
+
+        // Find response by event ID and email
+        const response = await prisma.response.findUnique({
             where: {
-                eventId: params.eventId,
-                name: name.trim(),
-            },
-            orderBy: {
-                updatedAt: 'desc', // Get the most recent one if multiple exist
+                eventId_email: {
+                    eventId: params.eventId,
+                    email: email.trim().toLowerCase(),
+                },
             },
         });
 
@@ -45,9 +57,16 @@ export async function POST(
 ) {
     try {
         const body = await request.json();
-        const { name, availabilitySlots, responseId } = body;
+        const { name, email, availabilitySlots } = body;
 
         // Validate required fields
+        if (!email || !isValidEmail(email)) {
+            return NextResponse.json(
+                { error: "请输入有效的邮箱地址" },
+                { status: 400 }
+            );
+        }
+
         if (!name || name.trim().length < 2) {
             return NextResponse.json(
                 { error: "请输入至少2个字符的昵称" },
@@ -75,31 +94,15 @@ export async function POST(
         }
 
         const trimmedName = name.trim();
+        const normalizedEmail = email.trim().toLowerCase();
 
-        // Check if we should update existing response
-        if (responseId) {
-            // Update by responseId
-            const existingResponse = await prisma.response.findUnique({
-                where: { id: responseId },
-            });
-
-            if (existingResponse && existingResponse.eventId === params.eventId) {
-                const updatedResponse = await prisma.response.update({
-                    where: { id: responseId },
-                    data: {
-                        name: trimmedName,
-                        availabilitySlots,
-                    },
-                });
-                return NextResponse.json({ response: updatedResponse, isUpdate: true });
-            }
-        }
-
-        // Try to find existing response by name
-        const existingResponse = await prisma.response.findFirst({
+        // Try to find existing response by email (using unique constraint)
+        const existingResponse = await prisma.response.findUnique({
             where: {
-                eventId: params.eventId,
-                name: trimmedName,
+                eventId_email: {
+                    eventId: params.eventId,
+                    email: normalizedEmail,
+                },
             },
         });
 
@@ -108,6 +111,7 @@ export async function POST(
             const updatedResponse = await prisma.response.update({
                 where: { id: existingResponse.id },
                 data: {
+                    name: trimmedName,
                     availabilitySlots,
                 },
             });
@@ -119,8 +123,9 @@ export async function POST(
             data: {
                 eventId: params.eventId,
                 name: trimmedName,
+                email: normalizedEmail,
                 availabilitySlots,
-                sessionToken: `session_${Date.now()}_${Math.random().toString(36)}`, // Still generate for compatibility
+                sessionToken: `session_${Date.now()}_${Math.random().toString(36)}`,
             },
         });
 

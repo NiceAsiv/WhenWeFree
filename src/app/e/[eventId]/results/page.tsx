@@ -34,7 +34,14 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
                     variant="h3"
                     component="h1"
                     gutterBottom
-                    sx={{ fontWeight: 700 }}
+                    sx={{
+                        fontWeight: 700,
+                        fontSize: { xs: '2rem', sm: '2.5rem' },
+                        background: 'linear-gradient(135deg, #1AAD19 0%, #2BA245 100%)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text',
+                    }}
                 >
                     {event.title} - 结果
                 </Typography>

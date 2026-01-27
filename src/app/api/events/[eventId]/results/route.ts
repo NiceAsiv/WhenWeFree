@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { Response as EventResponse } from "@prisma/client";
 import { calculateSlotCounts, findCommonSlots, findRecommendedSlots } from "@/lib/timeUtils";
 
 export async function GET(
@@ -26,8 +27,8 @@ export async function GET(
 
         // Aggregate availability data
         const slotCounts = new Array(totalSlots).fill(0);
-        event.responses.forEach((response) => {
-            response.availabilitySlots.forEach((slotIndex) => {
+        event.responses.forEach((response: EventResponse) => {
+            response.availabilitySlots.forEach((slotIndex: number) => {
                 if (slotIndex >= 0 && slotIndex < totalSlots) {
                     slotCounts[slotIndex]++;
                 }

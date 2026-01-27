@@ -37,11 +37,13 @@ model Response {
   eventId           String
   event             Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   name              String?  // participant name (optional)
+  email             String   // participant email (required for uniqueness)
   availabilitySlots Int[]    // array of slot indices
   sessionToken      String   @unique // for allowing edits from same device
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
+  @@unique([eventId, email]) // Ensure one response per email per event
   @@index([eventId])
   @@index([sessionToken])
 }

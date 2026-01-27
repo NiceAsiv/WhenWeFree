@@ -1,21 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { Container, Typography, Box, Button, Paper } from "@mui/material";
 import Link from "next/link";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import ShareIcon from "@mui/icons-material/Share";
-import EventAvailableIcon from "@mui/icons-material/EventAvailable";
-import ShareDialog from "@/components/ShareDialog";
+import ErrorIcon from "@mui/icons-material/Error";
+import HomeIcon from "@mui/icons-material/Home";
+import RefreshIcon from "@mui/icons-material/Refresh";
 
-interface ConfirmedPageProps {
-    params: {
-        eventId: string;
-    };
-}
-
-export default function ConfirmedPage({ params }: ConfirmedPageProps) {
-    const [shareDialogOpen, setShareDialogOpen] = useState(false);
+export default function Error({
+    error,
+    reset,
+}: {
+    error: Error & { digest?: string };
+    reset: () => void;
+}) {
+    useEffect(() => {
+        // Log the error to an error reporting service
+        console.error('Application error:', error);
+    }, [error]);
 
     return (
         <Container maxWidth="md" sx={{ py: 8 }}>
@@ -25,16 +27,17 @@ export default function ConfirmedPage({ params }: ConfirmedPageProps) {
                     p: { xs: 4, sm: 6 },
                     borderRadius: 3,
                     border: '1px solid',
-                    borderColor: 'divider',
+                    borderColor: 'error.main',
                     textAlign: 'center',
+                    backgroundColor: 'error.lighter',
                 }}
             >
                 <Box sx={{ mb: 4 }}>
-                    <CheckCircleIcon
+                    <ErrorIcon
                         sx={{
-                            fontSize: 80,
-                            color: 'success.main',
-                            mb: 2,
+                            fontSize: 100,
+                            color: 'error.main',
+                            mb: 3,
                         }}
                     />
                     <Typography
@@ -43,25 +46,43 @@ export default function ConfirmedPage({ params }: ConfirmedPageProps) {
                         gutterBottom
                         sx={{
                             fontWeight: 700,
-                            background: 'linear-gradient(135deg, #1AAD19 0%, #2BA245 100%)',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                            backgroundClip: 'text',
+                            mb: 2,
+                            color: 'error.main',
                         }}
                     >
-                        活动创建成功！
+                        出错了
                     </Typography>
-                    <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-                        现在可以分享活动链接给参与者，让他们填写自己的空闲时间
+                    <Typography variant="body1" color="text.secondary" sx={{ mb: 2, maxWidth: 500, mx: 'auto' }}>
+                        抱歉，应用程序遇到了一个错误。
                     </Typography>
+                    {error.message && (
+                        <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{
+                                mb: 4,
+                                maxWidth: 500,
+                                mx: 'auto',
+                                fontFamily: 'monospace',
+                                backgroundColor: 'background.paper',
+                                p: 2,
+                                borderRadius: 1,
+                                border: '1px solid',
+                                borderColor: 'divider',
+                            }}
+                        >
+                            {error.message}
+                        </Typography>
+                    )}
                 </Box>
 
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 400, mx: 'auto' }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 300, mx: 'auto' }}>
                     <Button
                         variant="contained"
                         size="large"
-                        startIcon={<ShareIcon />}
-                        onClick={() => setShareDialogOpen(true)}
+                        fullWidth
+                        startIcon={<RefreshIcon />}
+                        onClick={reset}
                         sx={{
                             py: 1.5,
                             fontSize: '1rem',
@@ -75,14 +96,14 @@ export default function ConfirmedPage({ params }: ConfirmedPageProps) {
                             transition: 'all 0.3s ease',
                         }}
                     >
-                        分享活动链接
+                        重试
                     </Button>
-                    <Link href={`/e/${params.eventId}`} passHref style={{ textDecoration: 'none' }}>
+                    <Link href="/" passHref style={{ textDecoration: 'none' }}>
                         <Button
                             variant="outlined"
                             size="large"
                             fullWidth
-                            startIcon={<EventAvailableIcon />}
+                            startIcon={<HomeIcon />}
                             sx={{
                                 py: 1.5,
                                 fontSize: '1rem',
@@ -97,19 +118,11 @@ export default function ConfirmedPage({ params }: ConfirmedPageProps) {
                                 transition: 'all 0.3s ease',
                             }}
                         >
-                            查看活动页面
+                            返回首页
                         </Button>
                     </Link>
                 </Box>
             </Paper>
-
-            {/* Share Dialog */}
-            <ShareDialog
-                open={shareDialogOpen}
-                onClose={() => setShareDialogOpen(false)}
-                eventId={params.eventId}
-                eventTitle="活动"
-            />
         </Container>
     );
 }

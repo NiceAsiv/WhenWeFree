@@ -53,7 +53,7 @@ export default function EventFormStepper() {
     const [minDurationMinutes, setMinDurationMinutes] = useState(60);
 
     // Custom time slots (for custom mode)
-    const [customTimeSlots, setCustomTimeSlots] = useState<Array<{label: string; startTime: string; endTime: string}>>([]);
+    const [customTimeSlots, setCustomTimeSlots] = useState<Array<{ label: string; startTime: string; endTime: string }>>([]);
     const [newSlotLabel, setNewSlotLabel] = useState('');
     const [newSlotStart, setNewSlotStart] = useState('09:00');
     const [newSlotEnd, setNewSlotEnd] = useState('10:00');
@@ -65,12 +65,12 @@ export default function EventFormStepper() {
             const [h, m] = time.split(':').map(Number);
             return h * 60 + m;
         };
-        
+
         const s1 = timeToMinutes(start1);
         const e1 = timeToMinutes(end1);
         const s2 = timeToMinutes(start2);
         const e2 = timeToMinutes(end2);
-        
+
         // Check if ranges overlap
         return (s1 < e2 && e1 > s2);
     };
@@ -78,28 +78,28 @@ export default function EventFormStepper() {
     // Add custom time slot with validation
     const addCustomTimeSlot = () => {
         setCustomSlotError('');
-        
+
         if (!newSlotLabel.trim()) {
             setCustomSlotError('请输入时间段标签');
             return;
         }
-        
+
         if (!newSlotStart || !newSlotEnd) {
             setCustomSlotError('请设置开始和结束时间');
             return;
         }
-        
+
         // Check if start time is before end time
         const timeToMinutes = (time: string) => {
             const [h, m] = time.split(':').map(Number);
             return h * 60 + m;
         };
-        
+
         if (timeToMinutes(newSlotStart) >= timeToMinutes(newSlotEnd)) {
             setCustomSlotError('开始时间必须早于结束时间');
             return;
         }
-        
+
         // Check for overlaps with existing slots
         for (const slot of customTimeSlots) {
             if (checkTimeOverlap(newSlotStart, newSlotEnd, slot.startTime, slot.endTime)) {
@@ -107,14 +107,14 @@ export default function EventFormStepper() {
                 return;
             }
         }
-        
+
         // All validations passed, add the slot
         setCustomTimeSlots([...customTimeSlots, {
             label: newSlotLabel.trim(),
             startTime: newSlotStart,
             endTime: newSlotEnd,
         }]);
-        
+
         // Reset form
         setNewSlotLabel('');
         setNewSlotStart('09:00');
@@ -442,7 +442,7 @@ export default function EventFormStepper() {
                                                             自定义选项
                                                         </Typography>
                                                         <Typography variant="body2" color="text.secondary">
-                                                            自己添加时间段选项（午餐、晚餐等）
+                                                            自己添加时间段选项（晚餐时间段：17:00-18:00 18：00-19：00）
                                                         </Typography>
                                                     </Box>
                                                 </Box>
@@ -507,9 +507,9 @@ export default function EventFormStepper() {
                                                 <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 500 }}>
                                                     时间槽预览
                                                 </Typography>
-                                                <Box sx={{ 
-                                                    display: 'flex', 
-                                                    flexWrap: 'wrap', 
+                                                <Box sx={{
+                                                    display: 'flex',
+                                                    flexWrap: 'wrap',
                                                     gap: 0.5,
                                                     maxHeight: 200,
                                                     overflowY: 'auto',
@@ -523,7 +523,7 @@ export default function EventFormStepper() {
                                                         const totalMinutes = (endHour * 60 + endMin) - (startHour * 60 + startMin);
                                                         const totalSlots = Math.floor(totalMinutes / slotMinutes);
                                                         const displaySlots = totalSlots > 20 ? 20 : totalSlots;
-                                                        
+
                                                         return (
                                                             <>
                                                                 {Array.from({ length: displaySlots }).map((_, i) => {
@@ -603,7 +603,7 @@ export default function EventFormStepper() {
                                             <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 500 }}>
                                                 自定义时间段
                                             </Typography>
-                                            
+
                                             {/* Existing slots - Preview */}
                                             {customTimeSlots.length > 0 && (
                                                 <Box sx={{ mb: 2 }}>
@@ -612,27 +612,27 @@ export default function EventFormStepper() {
                                                     </Typography>
                                                     <Stack spacing={1}>
                                                         {customTimeSlots.map((slot, index) => (
-                                                            <Box 
+                                                            <Box
                                                                 key={index}
-                                                                sx={{ 
-                                                                    display: 'flex', 
-                                                                    alignItems: 'center', 
-                                                                    gap: 1, 
-                                                                    p: 1.5, 
-                                                                    bgcolor: 'background.paper', 
+                                                                sx={{
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: 1,
+                                                                    p: 1.5,
+                                                                    bgcolor: 'background.paper',
                                                                     borderRadius: 1,
                                                                     border: 1,
                                                                     borderColor: 'divider'
                                                                 }}
                                                             >
-                                                                <Box 
-                                                                    sx={{ 
-                                                                        width: 8, 
-                                                                        height: 8, 
-                                                                        borderRadius: '50%', 
+                                                                <Box
+                                                                    sx={{
+                                                                        width: 8,
+                                                                        height: 8,
+                                                                        borderRadius: '50%',
                                                                         backgroundColor: `hsl(${(index * 137.5) % 360}, 70%, 60%)`,
                                                                         flexShrink: 0
-                                                                    }} 
+                                                                    }}
                                                                 />
                                                                 <Box sx={{ flex: 1 }}>
                                                                     <Typography variant="body2" sx={{ fontWeight: 500 }}>
@@ -642,8 +642,8 @@ export default function EventFormStepper() {
                                                                         {slot.startTime} - {slot.endTime}
                                                                     </Typography>
                                                                 </Box>
-                                                                <Button 
-                                                                    size="small" 
+                                                                <Button
+                                                                    size="small"
                                                                     onClick={() => {
                                                                         setCustomTimeSlots(customTimeSlots.filter((_, i) => i !== index));
                                                                     }}
@@ -706,14 +706,14 @@ export default function EventFormStepper() {
                                                             InputLabelProps={{ shrink: true }}
                                                         />
                                                     </Box>
-                                                    
+
                                                     {/* Error message */}
                                                     {customSlotError && (
                                                         <Alert severity="error" sx={{ mt: 1 }}>
                                                             {customSlotError}
                                                         </Alert>
                                                     )}
-                                                    
+
                                                     <Button
                                                         variant="outlined"
                                                         size="small"
@@ -743,9 +743,9 @@ export default function EventFormStepper() {
                 {/* Actions */}
                 <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
                     {activeStep > 0 && (
-                        <Button 
-                            variant="outlined" 
-                            onClick={handleBack} 
+                        <Button
+                            variant="outlined"
+                            onClick={handleBack}
                             sx={{ minWidth: 100 }}
                         >
                             上一步
