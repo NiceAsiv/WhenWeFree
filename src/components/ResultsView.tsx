@@ -16,6 +16,7 @@ import {
 } from '@mui/material';
 import { addDays } from 'date-fns';
 import TimeGrid from './TimeGrid';
+import { useTranslation } from "@/hooks/useTranslation";
 import { Event, Response } from '@/types';
 
 interface ResultsViewProps {
@@ -24,6 +25,7 @@ interface ResultsViewProps {
 }
 
 export default function ResultsView({ event, responses }: ResultsViewProps) {
+    const { t } = useTranslation();
     const [tabValue, setTabValue] = useState(0);
     const [resultsData, setResultsData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -138,19 +140,19 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
         <Box>
             <Paper sx={{ mb: 3 }}>
                 <Tabs value={tabValue} onChange={(_, v) => setTabValue(v)}>
-                    <Tab label="热力图" />
-                    <Tab label="全员可用" />
-                    <Tab label="推荐时间" />
+                    <Tab label={t('resultsPage.heatmap')} />
+                    <Tab label={t('resultsPage.allAvailable')} />
+                    <Tab label={t('resultsPage.recommended')} />
                 </Tabs>
             </Paper>
 
             {tabValue === 0 && (
                 <Paper elevation={2} sx={{ p: 3 }}>
                     <Typography variant="h6" gutterBottom>
-                        可用人数热力图
+                        {t('resultsPage.heatmapTitle')}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                        颜色越深表示可用人数越多
+                        {t('resultsPage.heatmapDescription')}
                     </Typography>
                     <TimeGrid
                         event={event}
@@ -160,7 +162,7 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
                         maxCount={maxCount}
                     />
                     <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Typography variant="body2" color="text.secondary">0 人</Typography>
+                        <Typography variant="body2" color="text.secondary">0 {t('resultsPage.people')}</Typography>
                         <Box
                             sx={{
                                 flex: 1,
@@ -171,7 +173,7 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
                                 borderColor: 'divider',
                             }}
                         />
-                        <Typography variant="body2" color="text.secondary">{totalParticipants} 人</Typography>
+                        <Typography variant="body2" color="text.secondary">{totalParticipants} {t('resultsPage.people')}</Typography>
                     </Box>
                 </Paper>
             )}
@@ -179,11 +181,11 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
             {tabValue === 1 && (
                 <Paper elevation={2} sx={{ p: 3 }}>
                     <Typography variant="h6" gutterBottom>
-                        全员共同可用时间段
+                        {t('resultsPage.allAvailableTitle')}
                     </Typography>
                     {commonSlots.length === 0 ? (
                         <Typography color="text.secondary">
-                            暂无全员共同可用的时间段
+                            {t('resultsPage.noCommonSlots')}
                         </Typography>
                     ) : (
                         <List>
@@ -193,22 +195,22 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
                                     sx={{
                                         borderRadius: 2,
                                         mb: 1,
-                                        backgroundColor: 'success.lighter',
+                                        backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(26, 173, 25, 0.1)' : 'rgba(26, 173, 25, 0.08)',
                                         '&:hover': {
-                                            backgroundColor: 'success.light',
+                                            backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(26, 173, 25, 0.2)' : 'rgba(26, 173, 25, 0.16)',
                                         },
                                     }}
                                 >
                                     <ListItemText
                                         primary={getSlotTimeRange(slotIndex)}
-                                        secondary="所有参与者都有空"
+                                        secondary={t('resultsPage.allParticipantsAvailable')}
                                         primaryTypographyProps={{
                                             fontWeight: 600,
                                             fontSize: '1.1rem',
                                         }}
                                     />
                                     <Chip
-                                        label={`${totalParticipants}/${totalParticipants} 人`}
+                                        label={`${totalParticipants}/${totalParticipants} ${t('resultsPage.people')}`}
                                         color="success"
                                         sx={{ fontWeight: 600 }}
                                     />
@@ -222,14 +224,14 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
             {tabValue === 2 && (
                 <Paper elevation={2} sx={{ p: 3 }}>
                     <Typography variant="h6" gutterBottom>
-                        推荐时间段（按人数排序）
+                        {t('resultsPage.recommendedTitle')}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                        显示参与人数最多的时间段
+                        {t('resultsPage.recommendedDescription')}
                     </Typography>
                     {recommendedSlots.length === 0 ? (
                         <Typography color="text.secondary">
-                            暂无推荐时间段
+                            {t('resultsPage.noRecommendedSlots')}
                         </Typography>
                     ) : (
                         <List>
@@ -254,17 +256,17 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
                                             primary={
                                                 <Box>
                                                     <Typography variant="body1" fontWeight={600}>
-                                                        {idx === 0 && '🏆 '}推荐 {idx + 1}
+                                                        {idx === 0 && '🏆 '}{t('resultsPage.recommended')} {idx + 1}
                                                     </Typography>
                                                     <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
                                                         {slot.slots.map((si: number) => getSlotTimeRange(si)).join(', ')}
                                                     </Typography>
                                                 </Box>
                                             }
-                                            secondary={`最少 ${slot.minCount} 人，平均 ${slot.averageCount.toFixed(1)} 人可用`}
+                                            secondary={`${t('resultsPage.minCount', { count: slot.minCount })}，${t('resultsPage.avgCount', { count: slot.averageCount.toFixed(1) })}`}
                                         />
                                         <Chip
-                                            label={`${slot.minCount}/${totalParticipants} 人`}
+                                            label={`${slot.minCount}/${totalParticipants} ${t('resultsPage.people')}`}
                                             color={idx === 0 ? "primary" : "default"}
                                             sx={{ fontWeight: 600 }}
                                         />
@@ -278,14 +280,14 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
 
             <Paper elevation={2} sx={{ p: 3, mt: 3 }}>
                 <Typography variant="h6" gutterBottom>
-                    参与者列表
+                    {t('resultsPage.participantsList')}
                 </Typography>
                 <List>
                     {responses.map((response) => (
                         <ListItem key={response.id}>
                             <ListItemText
-                                primary={response.name || '匿名参与者'}
-                                secondary={`已选择 ${response.availabilitySlots.length} 个时间段`}
+                                primary={response.name || t('resultsPage.anonymousParticipant')}
+                                secondary={t('resultsPage.slotsSelected', { count: response.availabilitySlots.length })}
                             />
                         </ListItem>
                     ))}

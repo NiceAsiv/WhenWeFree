@@ -9,6 +9,7 @@ import ShareIcon from "@mui/icons-material/Share";
 import ParticipantForm from "@/components/ParticipantForm";
 import SettingsMenu from "@/components/SettingsMenu";
 import ShareDialog from "@/components/ShareDialog";
+import { useTranslation } from "@/hooks/useTranslation";
 import { Event } from "@/types";
 
 interface EventPageProps {
@@ -18,6 +19,7 @@ interface EventPageProps {
 }
 
 export default function EventPage({ params }: EventPageProps) {
+    const { t } = useTranslation();
     const [event, setEvent] = useState<Event | null>(null);
     const [loading, setLoading] = useState(true);
     const [shareDialogOpen, setShareDialogOpen] = useState(false);
@@ -45,7 +47,7 @@ export default function EventPage({ params }: EventPageProps) {
         return (
             <Container maxWidth="lg" sx={{ py: 6, textAlign: 'center' }}>
                 <CircularProgress size={60} sx={{ color: 'primary.main' }} />
-                <Typography sx={{ mt: 3 }} color="text.secondary">加载中...</Typography>
+                <Typography sx={{ mt: 3 }} color="text.secondary">{t('loading')}</Typography>
             </Container>
         );
     }
@@ -130,7 +132,7 @@ export default function EventPage({ params }: EventPageProps) {
                                 transition: 'all 0.2s ease',
                             }}
                         >
-                            分享活动
+                            {t('eventPage.shareEvent')}
                         </Button>
                         <Link href={`/e/${params.eventId}/results`} passHref style={{ textDecoration: 'none' }}>
                             <Button
@@ -150,7 +152,7 @@ export default function EventPage({ params }: EventPageProps) {
                                     transition: 'all 0.2s ease',
                                 }}
                             >
-                                查看结果
+                                {t('eventPage.viewResults')}
                             </Button>
                         </Link>
                     </Box>

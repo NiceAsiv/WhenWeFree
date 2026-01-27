@@ -10,12 +10,155 @@ export const translations = {
         share: '分享',
         copy: '复制',
         copied: '已复制',
+        back: '返回',
+
+        // Home Page
+        homePage: {
+            title: 'When We Free?',
+            subtitle: '找到大家都有空的时间，让活动安排变得简单',
+            createEvent: '创建活动',
+            features: {
+                simple: {
+                    title: '简单易用',
+                    description: '创建活动，分享链接，参与者快速填写空闲时间',
+                },
+                smart: {
+                    title: '智能推荐',
+                    description: '自动计算交集，推荐最优时间段，支持热力图展示',
+                },
+                timezone: {
+                    title: '时区支持',
+                    description: '跨时区团队协作无忧，自动处理时区转换',
+                },
+            },
+            useCases: {
+                title: '适用场景',
+                teamActivity: '团队活动',
+                interview: '面试安排',
+                gathering: '朋友聚会',
+                studyGroup: '学习小组',
+                eventPlanning: '活动策划',
+                meeting: '项目会议',
+            },
+        },
 
         // Event Page
         eventPage: {
             title: '活动详情',
             viewResults: '查看结果',
+            shareEvent: '分享活动',
             participants: '参与者',
+        },
+
+        // Results Page
+        resultsPage: {
+            title: '{title} - 结果',
+            responsesCount: '已收到 {count} 份回复',
+            heatmap: '热力图',
+            allAvailable: '全员可用',
+            recommended: '推荐时间',
+            heatmapTitle: '可用人数热力图',
+            heatmapDescription: '颜色越深表示可用人数越多',
+            allAvailableTitle: '全员共同可用时间段',
+            noCommonSlots: '暂无全员共同可用的时间段',
+            allParticipantsAvailable: '所有参与者都有空',
+            recommendedTitle: '推荐时间段（按人数排序）',
+            recommendedDescription: '显示参与人数最多的时间段',
+            noRecommendedSlots: '暂无推荐时间段',
+            minCount: '最少 {count} 人',
+            avgCount: '平均 {count} 人可用',
+            participantsList: '参与者列表',
+            slotsSelected: '已选择 {count} 个时间段',
+            anonymousParticipant: '匿名参与者',
+            people: '人',
+        },
+
+        // Create Event Page
+        createEvent: {
+            title: '创建新活动',
+            subtitle: '找到大家都有空的时间',
+            steps: {
+                basicInfo: '基本信息',
+                selectMode: '选择模式',
+                timeConfig: '时间配置',
+            },
+            basicInfo: {
+                title: '活动标题',
+                titlePlaceholder: '例如：周末聚餐、团队建设、电影之夜',
+                description: '活动描述（可选）',
+                descriptionPlaceholder: '添加活动的更多信息...',
+                errorTitleRequired: '请输入活动标题',
+            },
+            modeSelection: {
+                title: '选择活动模式',
+                timeRange: {
+                    title: '约时间段',
+                    description: '选择具体的时间段，如 9:00-10:00、14:00-15:00',
+                    suitable: '适合：团队会议、面试安排、工作协调',
+                },
+                fullDay: {
+                    title: '约整天',
+                    description: '选择完整的日期，不区分具体时间',
+                    suitable: '适合：团建活动、聚餐聚会、出游计划',
+                },
+            },
+            timeConfig: {
+                dateRange: '日期范围',
+                maxDays: '（最多14天）',
+                startDate: '开始日期',
+                endDate: '结束日期',
+                daysCount: '✓ 共 {count} 天',
+                timeDivision: '时间划分方式',
+                standardMode: {
+                    title: '标准模式',
+                    description: '自定义开始/结束时间和时间间隔',
+                    settings: '详细设置',
+                    dayStartTime: '每天开始时间',
+                    dayEndTime: '每天结束时间',
+                    slotDuration: '时间粒度',
+                    minDuration: '最短活动时长',
+                    minutes: '{count} 分钟',
+                    preview: '时间槽预览',
+                    slotsCount: '共 {days} 天 × {slots} 个时段 = {total} 个选项',
+                    moreSlots: '...等{count}个',
+                },
+                periodMode: {
+                    title: '按时段划分',
+                    description: '上午、下午、晚上（简单快捷）',
+                    morning: '上午',
+                    afternoon: '下午',
+                    evening: '晚上',
+                    preview: '时间段预览',
+                },
+                customMode: {
+                    title: '自定义选项',
+                    description: '自己添加时间段选项（晚餐时间段：17:00-18:00）',
+                    sectionTitle: '自定义时间段',
+                    preview: '已添加的时间段预览',
+                    addNew: '添加新时间段',
+                    label: '标签',
+                    labelPlaceholder: '例如：下午 4-5',
+                    startTime: '开始时间',
+                    endTime: '结束时间',
+                    addBtn: '添加时间段',
+                    delete: '删除',
+                    errorLabel: '请输入时间段标签',
+                    errorTime: '请设置开始和结束时间',
+                    errorTimeOrder: '开始时间必须早于结束时间',
+                    errorOverlap: '时间段与「{label}」重叠，请调整时间',
+                },
+                errors: {
+                    dateOrder: '结束日期不能早于开始日期',
+                    dateRangeLimit: '约时间段模式日期范围最多14天',
+                },
+            },
+            actions: {
+                prev: '上一步',
+                next: '下一步',
+                create: '创建活动',
+                creating: '创建中...',
+                failed: '创建失败',
+            },
         },
 
         // Participant Form
@@ -71,12 +214,155 @@ export const translations = {
         share: 'Share',
         copy: 'Copy',
         copied: 'Copied',
+        back: 'Back',
+
+        // Home Page
+        homePage: {
+            title: 'When We Free?',
+            subtitle: 'Find time for everyone easily',
+            createEvent: 'Create Event',
+            features: {
+                simple: {
+                    title: 'Simple & Easy',
+                    description: 'Create event, share link, participants fill availability quickly',
+                },
+                smart: {
+                    title: 'Smart Recommendation',
+                    description: 'Auto-calculate intersection, recommend best slots, heatmap support',
+                },
+                timezone: {
+                    title: 'Timezone Support',
+                    description: 'Seamless cross-timezone collaboration, auto timezone conversion',
+                },
+            },
+            useCases: {
+                title: 'Use Cases',
+                teamActivity: 'Team Activity',
+                interview: 'Interview',
+                gathering: 'Friends Gathering',
+                studyGroup: 'Study Group',
+                eventPlanning: 'Event Planning',
+                meeting: 'Project Meeting',
+            },
+        },
 
         // Event Page
         eventPage: {
             title: 'Event Details',
             viewResults: 'View Results',
+            shareEvent: 'Share Event',
             participants: 'Participants',
+        },
+
+        // Results Page
+        resultsPage: {
+            title: '{title} - Results',
+            responsesCount: '{count} responses received',
+            heatmap: 'Heatmap',
+            allAvailable: 'All Available',
+            recommended: 'Recommended',
+            heatmapTitle: 'Availability Heatmap',
+            heatmapDescription: 'Darker color indicates more people available',
+            allAvailableTitle: 'Common Available Slots',
+            noCommonSlots: 'No common slots found',
+            allParticipantsAvailable: 'All participants available',
+            recommendedTitle: 'Recommended Slots (by count)',
+            recommendedDescription: 'Slots with most participants',
+            noRecommendedSlots: 'No recommended slots found',
+            minCount: 'Min {count}',
+            avgCount: 'Avg {count} available',
+            participantsList: 'Participants List',
+            slotsSelected: '{count} slots selected',
+            anonymousParticipant: 'Anonymous',
+            people: 'people',
+        },
+
+        // Create Event Page
+        createEvent: {
+            title: 'Create New Event',
+            subtitle: 'Find time for everyone easily',
+            steps: {
+                basicInfo: 'Basic Info',
+                selectMode: 'Select Mode',
+                timeConfig: 'Time Config',
+            },
+            basicInfo: {
+                title: 'Event Title',
+                titlePlaceholder: 'e.g., Weekend Dinner, Team Building, Movie Night',
+                description: 'Description (Optional)',
+                descriptionPlaceholder: 'Add more details about the event...',
+                errorTitleRequired: 'Please enter event title',
+            },
+            modeSelection: {
+                title: 'Select Event Mode',
+                timeRange: {
+                    title: 'Time Range',
+                    description: 'Select specific time slots, e.g., 9:00-10:00, 14:00-15:00',
+                    suitable: 'Best for: Team meetings, Interviews, Work coordination',
+                },
+                fullDay: {
+                    title: 'Full Day',
+                    description: 'Select complete dates, no specific time',
+                    suitable: 'Best for: Team building, Gatherings, Trips',
+                },
+            },
+            timeConfig: {
+                dateRange: 'Date Range',
+                maxDays: '(Max 14 days)',
+                startDate: 'Start Date',
+                endDate: 'End Date',
+                daysCount: '✓ Total {count} days',
+                timeDivision: 'Time Division',
+                standardMode: {
+                    title: 'Standard Mode',
+                    description: 'Custom start/end time and interval',
+                    settings: 'Detailed Settings',
+                    dayStartTime: 'Day Start Time',
+                    dayEndTime: 'Day End Time',
+                    slotDuration: 'Time Slot Duration',
+                    minDuration: 'Min Duration',
+                    minutes: '{count} Minutes',
+                    preview: 'Slots Preview',
+                    slotsCount: 'Total {days} days × {slots} slots = {total} options',
+                    moreSlots: '...and {count} more',
+                },
+                periodMode: {
+                    title: 'By Period',
+                    description: 'Morning, Afternoon, Evening (Simple & Quick)',
+                    morning: 'Morning',
+                    afternoon: 'Afternoon',
+                    evening: 'Evening',
+                    preview: 'Period Preview',
+                },
+                customMode: {
+                    title: 'Custom Options',
+                    description: 'Add your own time slots (e.g., Dinner: 17:00-18:00)',
+                    sectionTitle: 'Custom Time Slots',
+                    preview: 'Added Slots Preview',
+                    addNew: 'Add New Slot',
+                    label: 'Label',
+                    labelPlaceholder: 'e.g., Afternoon 4-5',
+                    startTime: 'Start Time',
+                    endTime: 'End Time',
+                    addBtn: 'Add Slot',
+                    delete: 'Delete',
+                    errorLabel: 'Please enter slot label',
+                    errorTime: 'Please set start and end time',
+                    errorTimeOrder: 'Start time must be before end time',
+                    errorOverlap: 'Overlap with "{label}", please adjust',
+                },
+                errors: {
+                    dateOrder: 'End date cannot be earlier than start date',
+                    dateRangeLimit: 'Time range mode allows max 14 days',
+                },
+            },
+            actions: {
+                prev: 'Back',
+                next: 'Next',
+                create: 'Create Event',
+                creating: 'Creating...',
+                failed: 'Creation Failed',
+            },
         },
 
         // Participant Form

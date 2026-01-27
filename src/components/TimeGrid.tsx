@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useMemo } from 'react';
 import { Box, Paper, Typography } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { Event } from '@/types';
 import { format, addDays } from 'date-fns';
 
@@ -20,6 +21,8 @@ export default function TimeGrid({
     heatmapData,
     maxCount,
 }: TimeGridProps) {
+    const theme = useTheme();
+    const isDark = theme.palette.mode === 'dark';
     const [isDragging, setIsDragging] = useState(false);
     const [dragMode, setDragMode] = useState<'select' | 'deselect'>('select');
 
@@ -55,7 +58,7 @@ export default function TimeGrid({
             const totalMinutes = (endHour * 60 + endMin) - (startHour * 60 + startMin);
             const count = Math.floor(totalMinutes / event.slotMinutes);
             const labels = Array.from({ length: count }).map((_, i) => {
-                const minutes = startHour * 60 + startMin + i * event.slotMinutes;
+                const minutes = startHour * 60 + startMin + i * event.slotMinutes!;
                 const hour = Math.floor(minutes / 60);
                 const min = minutes % 60;
                 return `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
@@ -100,12 +103,12 @@ export default function TimeGrid({
     const getSlotColor = (slotIndex: number) => {
         if (heatmapData && maxCount) {
             const count = heatmapData[slotIndex] || 0;
-            if (count === 0) return '#f5f5f5';
+            if (count === 0) return isDark ? 'rgba(255, 255, 255, 0.05)' : '#f5f5f5';
             const intensity = count / maxCount;
             // Use WeChat green gradient for heatmap
             return `rgba(26, 173, 25, ${0.15 + intensity * 0.7})`;
         }
-        return selectedSlots.includes(slotIndex) ? '#1AAD19' : '#f5f5f5';
+        return selectedSlots.includes(slotIndex) ? '#1AAD19' : (isDark ? 'rgba(255, 255, 255, 0.05)' : '#f5f5f5');
     };
 
     const getSlotLabel = (slotIndex: number) => {
@@ -125,7 +128,7 @@ export default function TimeGrid({
                 sx={{
                     p: { xs: 1.5, sm: 2.5 },
                     overflowX: 'auto',
-                    backgroundColor: '#fff',
+                    backgroundColor: 'background.paper',
                     borderRadius: 2.5,
                     border: '1px solid',
                     borderColor: 'divider',
@@ -135,14 +138,14 @@ export default function TimeGrid({
                         height: '8px',
                     },
                     '&::-webkit-scrollbar-track': {
-                        background: '#f5f5f5',
+                        background: isDark ? '#333' : '#f5f5f5',
                         borderRadius: '4px',
                     },
                     '&::-webkit-scrollbar-thumb': {
-                        background: '#d0d0d0',
+                        background: isDark ? '#555' : '#d0d0d0',
                         borderRadius: '4px',
                         '&:hover': {
-                            background: '#b0b0b0',
+                            background: isDark ? '#777' : '#b0b0b0',
                         },
                     },
                 }}
@@ -208,7 +211,7 @@ export default function TimeGrid({
                                         <div style={{ fontWeight: 600 }}>{format(currentDay, 'EEE')}</div>
                                         <div style={{
                                             fontSize: window.innerWidth < 600 ? '0.75rem' : '0.8125rem',
-                                            color: '#888',
+                                            color: isDark ? '#aaa' : '#888',
                                             fontWeight: 500
                                         }}>
                                             {format(currentDay, 'M/d')}
@@ -235,7 +238,7 @@ export default function TimeGrid({
                                                 m: 0.5,
                                                 backgroundColor: getSlotColor(slotIndex),
                                                 border: '1.5px solid',
-                                                borderColor: isSelected ? '#1AAD19' : '#e0e0e0',
+                                                borderColor: isSelected ? '#1AAD19' : 'divider',
                                                 borderRadius: 1.5,
                                                 cursor: 'pointer',
                                                 display: 'flex',

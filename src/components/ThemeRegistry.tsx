@@ -1,7 +1,7 @@
 'use client';
 
 import { createTheme, ThemeProvider, CssBaseline } from '@mui/material';
-import { ReactNode, useMemo } from 'react';
+import { ReactNode, useMemo, useEffect } from 'react';
 import { useApp } from '@/contexts/AppContext';
 
 // WeChat Standard Color Guidelines (2017.03)
@@ -26,6 +26,14 @@ const wechatColors = {
 
 function ThemeContent({ children }: { children: ReactNode }) {
     const { darkMode } = useApp();
+
+    useEffect(() => {
+        if (darkMode) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    }, [darkMode]);
 
     const theme = useMemo(() => createTheme({
         palette: {

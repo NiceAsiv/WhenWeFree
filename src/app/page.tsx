@@ -1,3 +1,5 @@
+'use client';
+
 import { Container, Box, Typography, Button, Paper, Card } from "@mui/material";
 import CalendarMonth from "@mui/icons-material/CalendarMonth";
 import Group from "@mui/icons-material/Group";
@@ -5,10 +7,24 @@ import Schedule from "@mui/icons-material/Schedule";
 import EventAvailable from "@mui/icons-material/EventAvailable";
 import Link from "next/link";
 import Image from "next/image";
+import SettingsMenu from "@/components/SettingsMenu";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function Home() {
+    const { t } = useTranslation();
+
     return (
-        <Box sx={{ background: 'linear-gradient(180deg, #F1F1F1 0%, #FFFFFF 100%)', minHeight: '100vh' }}>
+        <Box sx={{
+            background: (theme) => theme.palette.mode === 'dark'
+                ? 'linear-gradient(180deg, #000000 0%, #121212 100%)'
+                : 'linear-gradient(180deg, #F1F1F1 0%, #FFFFFF 100%)',
+            minHeight: '100vh'
+        }}>
+            {/* Settings Menu in top right */}
+            <Box sx={{ position: 'fixed', top: 16, right: 16, zIndex: 1000 }}>
+                <SettingsMenu />
+            </Box>
+
             <Container maxWidth="lg">
                 <Box
                     sx={{
@@ -40,7 +56,7 @@ export default function Home() {
                             gutterBottom
                             sx={{
                                 fontWeight: 700,
-                                color: '#2BA245',
+                                color: (theme) => theme.palette.mode === 'dark' ? '#4CAF50' : '#2BA245',
                                 mb: 3,
                                 display: 'flex',
                                 alignItems: 'center',
@@ -49,7 +65,7 @@ export default function Home() {
                             }}
                         >
                             When We Free?
-                            <EventAvailable sx={{ fontSize: 56, color: '#2BA245' }} />
+                            <EventAvailable sx={{ fontSize: 56, color: (theme) => theme.palette.mode === 'dark' ? '#4CAF50' : '#2BA245' }} />
                         </Typography>
                         <Typography
                             variant="h4"
@@ -57,7 +73,7 @@ export default function Home() {
                             gutterBottom
                             sx={{ mb: 5, maxWidth: 600, mx: 'auto' }}
                         >
-                            找到大家都有空的时间，让活动安排变得简单
+                            {t('homePage.subtitle')}
                         </Typography>
                         <Link href="/new" passHref style={{ textDecoration: "none" }}>
                             <Button
@@ -74,7 +90,7 @@ export default function Home() {
                                     },
                                 }}
                             >
-                                创建活动
+                                {t('homePage.createEvent')}
                             </Button>
                         </Link>
                     </Box>
@@ -94,16 +110,18 @@ export default function Home() {
                             sx={{
                                 p: 4,
                                 textAlign: "center",
-                                backgroundColor: '#E8F5E9',
+                                backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#1E1E1E' : '#E8F5E9',
                                 transition: "all 0.3s ease",
+                                border: (theme) => theme.palette.mode === 'dark' ? '1px solid #333' : 'none',
                                 "&:hover": {
                                     transform: "translateY(-8px)",
-                                    boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.12)',
+                                    boxShadow: (theme) => theme.palette.mode === 'dark' ? '0px 8px 24px rgba(0, 0, 0, 0.5)' : '0px 8px 24px rgba(0, 0, 0, 0.12)',
+                                    borderColor: (theme) => theme.palette.mode === 'dark' ? '#4CAF50' : 'none'
                                 },
                             }}
                         >
                             <Box sx={{
-                                backgroundColor: '#2BA245',
+                                backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#2E7D32' : '#2BA245',
                                 borderRadius: '50%',
                                 width: 80,
                                 height: 80,
@@ -115,11 +133,11 @@ export default function Home() {
                             }}>
                                 <CalendarMonth sx={{ fontSize: 48, color: 'white' }} />
                             </Box>
-                            <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: '#1D1B20' }}>
-                                简单易用
+                            <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: (theme) => theme.palette.text.primary }}>
+                                {t('homePage.features.simple.title')}
                             </Typography>
                             <Typography variant="body1" color="text.secondary">
-                                创建活动，分享链接，参与者快速填写空闲时间
+                                {t('homePage.features.simple.description')}
                             </Typography>
                         </Card>
 
@@ -128,16 +146,18 @@ export default function Home() {
                             sx={{
                                 p: 4,
                                 textAlign: "center",
-                                backgroundColor: '#C8E6C9',
+                                backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#252525' : '#C8E6C9',
                                 transition: "all 0.3s ease",
+                                border: (theme) => theme.palette.mode === 'dark' ? '1px solid #333' : 'none',
                                 "&:hover": {
                                     transform: "translateY(-8px)",
-                                    boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.12)',
+                                    boxShadow: (theme) => theme.palette.mode === 'dark' ? '0px 8px 24px rgba(0, 0, 0, 0.5)' : '0px 8px 24px rgba(0, 0, 0, 0.12)',
+                                    borderColor: (theme) => theme.palette.mode === 'dark' ? '#4CAF50' : 'none'
                                 },
                             }}
                         >
                             <Box sx={{
-                                backgroundColor: '#1AAD19',
+                                backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#1B5E20' : '#1AAD19',
                                 borderRadius: '50%',
                                 width: 80,
                                 height: 80,
@@ -149,11 +169,11 @@ export default function Home() {
                             }}>
                                 <Group sx={{ fontSize: 48, color: 'white' }} />
                             </Box>
-                            <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: '#1D1B20' }}>
-                                智能推荐
+                            <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: (theme) => theme.palette.text.primary }}>
+                                {t('homePage.features.smart.title')}
                             </Typography>
                             <Typography variant="body1" color="text.secondary">
-                                自动计算交集，推荐最优时间段，支持热力图展示
+                                {t('homePage.features.smart.description')}
                             </Typography>
                         </Card>
 
@@ -162,16 +182,18 @@ export default function Home() {
                             sx={{
                                 p: 4,
                                 textAlign: "center",
-                                backgroundColor: '#E8F5E9',
+                                backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#1E1E1E' : '#E8F5E9',
                                 transition: "all 0.3s ease",
+                                border: (theme) => theme.palette.mode === 'dark' ? '1px solid #333' : 'none',
                                 "&:hover": {
                                     transform: "translateY(-8px)",
-                                    boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.12)',
+                                    boxShadow: (theme) => theme.palette.mode === 'dark' ? '0px 8px 24px rgba(0, 0, 0, 0.5)' : '0px 8px 24px rgba(0, 0, 0, 0.12)',
+                                    borderColor: (theme) => theme.palette.mode === 'dark' ? '#4CAF50' : 'none'
                                 },
                             }}
                         >
                             <Box sx={{
-                                backgroundColor: '#2BA245',
+                                backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#2E7D32' : '#2BA245',
                                 borderRadius: '50%',
                                 width: 80,
                                 height: 80,
@@ -183,11 +205,11 @@ export default function Home() {
                             }}>
                                 <Schedule sx={{ fontSize: 48, color: 'white' }} />
                             </Box>
-                            <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: '#1D1B20' }}>
-                                时区支持
+                            <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: (theme) => theme.palette.text.primary }}>
+                                {t('homePage.features.timezone.title')}
                             </Typography>
                             <Typography variant="body1" color="text.secondary">
-                                跨时区团队协作无忧，自动处理时区转换
+                                {t('homePage.features.timezone.description')}
                             </Typography>
                         </Card>
                     </Box>
@@ -195,7 +217,7 @@ export default function Home() {
                     {/* Use Cases */}
                     <Box sx={{ mt: 10, textAlign: "center", width: '100%' }}>
                         <Typography variant="h4" gutterBottom sx={{ mb: 4, fontWeight: 600 }}>
-                            适用场景
+                            {t('homePage.useCases.title')}
                         </Typography>
                         <Box
                             sx={{
@@ -205,7 +227,14 @@ export default function Home() {
                                 justifyContent: "center",
                             }}
                         >
-                            {["团队活动", "面试安排", "朋友聚会", "学习小组", "活动策划", "项目会议"].map(
+                            {[
+                                t('homePage.useCases.teamActivity'),
+                                t('homePage.useCases.interview'),
+                                t('homePage.useCases.gathering'),
+                                t('homePage.useCases.studyGroup'),
+                                t('homePage.useCases.eventPlanning'),
+                                t('homePage.useCases.meeting')
+                            ].map(
                                 (useCase) => (
                                     <Paper
                                         key={useCase}
@@ -214,17 +243,19 @@ export default function Home() {
                                             px: 4,
                                             py: 2,
                                             borderRadius: 30,
-                                            backgroundColor: 'white',
-                                            border: '2px solid #E7E0EC',
+                                            backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#2D2D2D' : 'white',
+                                            border: (theme) => theme.palette.mode === 'dark'
+                                                ? '1px solid #444'
+                                                : '2px solid #E7E0EC',
                                             transition: 'all 0.2s ease',
                                             '&:hover': {
-                                                backgroundColor: '#F6EDFF',
-                                                borderColor: '#6750A4',
+                                                backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#383838' : '#F6EDFF',
+                                                borderColor: (theme) => theme.palette.mode === 'dark' ? '#BB86FC' : '#6750A4',
                                                 transform: 'scale(1.05)',
                                             }
                                         }}
                                     >
-                                        <Typography variant="body1" sx={{ fontWeight: 500, color: '#1D1B20' }}>
+                                        <Typography variant="body1" sx={{ fontWeight: 500, color: (theme) => theme.palette.text.primary }}>
                                             {useCase}
                                         </Typography>
                                     </Paper>

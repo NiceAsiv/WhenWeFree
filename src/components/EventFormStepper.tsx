@@ -25,14 +25,20 @@ import {
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { format, addDays, differenceInDays } from 'date-fns';
-
-const steps = ['基本信息', '选择模式', '时间配置'];
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function EventFormStepper() {
+    const { t } = useTranslation();
     const router = useRouter();
     const [activeStep, setActiveStep] = useState(0);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+
+    const steps = [
+        t('createEvent.steps.basicInfo'),
+        t('createEvent.steps.selectMode'),
+        t('createEvent.steps.timeConfig')
+    ];
 
     // Step 1: Basic Info
     const [title, setTitle] = useState('');
@@ -80,12 +86,12 @@ export default function EventFormStepper() {
         setCustomSlotError('');
 
         if (!newSlotLabel.trim()) {
-            setCustomSlotError('请输入时间段标签');
+            setCustomSlotError(t('createEvent.customMode.errorLabel'));
             return;
         }
 
         if (!newSlotStart || !newSlotEnd) {
-            setCustomSlotError('请设置开始和结束时间');
+            setCustomSlotError(t('createEvent.customMode.errorTime'));
             return;
         }
 
@@ -96,14 +102,14 @@ export default function EventFormStepper() {
         };
 
         if (timeToMinutes(newSlotStart) >= timeToMinutes(newSlotEnd)) {
-            setCustomSlotError('开始时间必须早于结束时间');
+            setCustomSlotError(t('createEvent.customMode.errorTimeOrder'));
             return;
         }
 
         // Check for overlaps with existing slots
         for (const slot of customTimeSlots) {
             if (checkTimeOverlap(newSlotStart, newSlotEnd, slot.startTime, slot.endTime)) {
-                setCustomSlotError(`时间段与「${slot.label}」重叠，请调整时间`);
+                setCustomSlotError(t('createEvent.customMode.errorOverlap', { label: slot.label }));
                 return;
             }
         }
@@ -125,7 +131,7 @@ export default function EventFormStepper() {
     const handleNext = () => {
         if (activeStep === 0) {
             if (!title.trim()) {
-                setError('请输入活动标题');
+                setError(t('createEvent.basicInfo.errorTitleRequired'));
                 return;
             }
         }
@@ -147,11 +153,11 @@ export default function EventFormStepper() {
     const submitForm = async () => {
         const daysDiff = differenceInDays(new Date(endDate), new Date(startDate));
         if (daysDiff < 0) {
-            setError('结束日期不能早于开始日期');
+            setError(t('createEvent.timeConfig.errors.dateOrder'));
             return;
         }
         if (mode === 'timeRange' && daysDiff > 13) {
-            setError('约时间段模式日期范围最多14天');
+            setError(t('createEvent.timeConfig.errors.dateRangeLimit'));
             return;
         }
 
@@ -184,7 +190,7 @@ export default function EventFormStepper() {
 
             if (!response.ok) {
                 const data = await response.json();
-                throw new Error(data.error || '创建失败');
+                throw new Error(data.error || t('createEvent.actions.failed'));
             }
 
             const data = await response.json();
@@ -201,14 +207,14 @@ export default function EventFormStepper() {
     };
 
     return (
-        <Box sx={{ minHeight: '100vh', backgroundColor: '#F5F5F5', py: 4 }}>
+        <Box sx={{ minHeight: '100vh', backgroundColor: (theme) => theme.palette.mode === 'dark' ? theme.palette.background.default : '#F5F5F5', py: 4 }}>
             <Box sx={{ maxWidth: 700, mx: 'auto', px: 2 }}>
                 {/* Header */}
                 <Typography variant="h4" sx={{ mb: 1, fontWeight: 600, textAlign: 'center' }}>
-                    创建新活动
+                    {t('createEvent.title')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 4, textAlign: 'center' }}>
-                    找到大家都有空的时间
+                    {t('createEvent.subtitle')}
                 </Typography>
 
                 {/* Stepper */}
@@ -221,18 +227,17 @@ export default function EventFormStepper() {
                         ))}
                     </Stepper>
                 </Box>
-
                 {/* Content */}
                 <Paper sx={{ p: 3, mb: 3, borderRadius: 2 }}>
                     {activeStep === 0 && (
                         <Stack spacing={3}>
                             <Box>
                                 <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 500 }}>
-                                    活动标题 <span style={{ color: '#FA5151' }}>*</span>
+                                    {t('createEvent.basicInfo.title')} <span style={{ color: '#FA5151' }}>*</span>
                                 </Typography>
                                 <TextField
                                     fullWidth
-                                    placeholder="例如：周末聚餐、团队建设、电影之夜"
+                                    placeholder={t('createEvent.basicInfo.titlePlaceholder')}
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
                                     inputProps={{ maxLength: 50 }}
@@ -241,13 +246,13 @@ export default function EventFormStepper() {
 
                             <Box>
                                 <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 500 }}>
-                                    活动描述（可选）
+                                    {t('createEvent.basicInfo.description')}
                                 </Typography>
                                 <TextField
                                     fullWidth
                                     multiline
                                     rows={3}
-                                    placeholder="添加活动的更多信息..."
+                                    placeholder={t('createEvent.basicInfo.descriptionPlaceholder')}
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
                                     inputProps={{ maxLength: 200 }}
@@ -259,7 +264,7 @@ export default function EventFormStepper() {
                     {activeStep === 1 && (
                         <Stack spacing={3}>
                             <Typography variant="h6" sx={{ mb: 2 }}>
-                                选择活动模式
+                                {t('createEvent.modeSelection.title')}
                             </Typography>
 
                             <RadioGroup value={mode} onChange={(e) => setMode(e.target.value as any)}>
@@ -282,14 +287,14 @@ export default function EventFormStepper() {
                                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
                                                 <AccessTimeIcon sx={{ fontSize: 20, color: 'primary.main' }} />
                                                 <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                                                    约时间段
+                                                    {t('createEvent.modeSelection.timeRange.title')}
                                                 </Typography>
                                             </Box>
                                             <Typography variant="body2" color="text.secondary">
-                                                选择具体的时间段，如 9:00-10:00、14:00-15:00
+                                                {t('createEvent.modeSelection.timeRange.description')}
                                             </Typography>
                                             <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                                                适合：团队会议、面试安排、工作协调
+                                                {t('createEvent.modeSelection.timeRange.suitable')}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -313,14 +318,14 @@ export default function EventFormStepper() {
                                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
                                                 <CalendarTodayIcon sx={{ fontSize: 20, color: 'primary.main' }} />
                                                 <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                                                    约整天
+                                                    {t('createEvent.modeSelection.fullDay.title')}
                                                 </Typography>
                                             </Box>
                                             <Typography variant="body2" color="text.secondary">
-                                                选择完整的日期，不区分具体时间
+                                                {t('createEvent.modeSelection.fullDay.description')}
                                             </Typography>
                                             <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                                                适合：团建活动、聚餐聚会、出游计划
+                                                {t('createEvent.modeSelection.fullDay.suitable')}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -334,12 +339,12 @@ export default function EventFormStepper() {
                             {/* Date Range */}
                             <Box>
                                 <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 500 }}>
-                                    日期范围{mode === 'timeRange' ? '（最多14天）' : ''}
+                                    {t('createEvent.timeConfig.dateRange')}{mode === 'timeRange' ? t('createEvent.timeConfig.maxDays') : ''}
                                 </Typography>
                                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
                                     <Box>
                                         <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
-                                            开始日期
+                                            {t('createEvent.timeConfig.startDate')}
                                         </Typography>
                                         <TextField
                                             type="date"
@@ -351,7 +356,7 @@ export default function EventFormStepper() {
                                     </Box>
                                     <Box>
                                         <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
-                                            结束日期
+                                            {t('createEvent.timeConfig.endDate')}
                                         </Typography>
                                         <TextField
                                             type="date"
@@ -363,7 +368,7 @@ export default function EventFormStepper() {
                                     </Box>
                                 </Box>
                                 <Typography variant="caption" sx={{ mt: 1, display: 'block', color: 'primary.main', fontWeight: 500 }}>
-                                    ✓ 共 {getDaysCount()} 天
+                                    {t('createEvent.timeConfig.daysCount', { count: getDaysCount() })}
                                 </Typography>
                             </Box>
 
@@ -371,7 +376,7 @@ export default function EventFormStepper() {
                             {mode === 'timeRange' && (
                                 <Box>
                                     <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 500 }}>
-                                        时间划分方式
+                                        {t('createEvent.timeConfig.timeDivision')}
                                     </Typography>
 
                                     <RadioGroup value={timeMode} onChange={(e) => setTimeMode(e.target.value as any)}>
@@ -391,10 +396,10 @@ export default function EventFormStepper() {
                                                     <Radio value="standard" />
                                                     <Box sx={{ flex: 1, ml: 1 }}>
                                                         <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                                                            标准模式
+                                                            {t('createEvent.timeConfig.standardMode.title')}
                                                         </Typography>
                                                         <Typography variant="body2" color="text.secondary">
-                                                            自定义开始/结束时间和时间间隔
+                                                            {t('createEvent.timeConfig.standardMode.description')}
                                                         </Typography>
                                                     </Box>
                                                 </Box>
@@ -415,10 +420,10 @@ export default function EventFormStepper() {
                                                     <Radio value="period" />
                                                     <Box sx={{ flex: 1, ml: 1 }}>
                                                         <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                                                            按时段划分
+                                                            {t('createEvent.timeConfig.periodMode.title')}
                                                         </Typography>
                                                         <Typography variant="body2" color="text.secondary">
-                                                            上午、下午、晚上（简单快捷）
+                                                            {t('createEvent.timeConfig.periodMode.description')}
                                                         </Typography>
                                                     </Box>
                                                 </Box>
@@ -439,10 +444,10 @@ export default function EventFormStepper() {
                                                     <Radio value="custom" />
                                                     <Box sx={{ flex: 1, ml: 1 }}>
                                                         <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                                                            自定义选项
+                                                            {t('createEvent.timeConfig.customMode.title')}
                                                         </Typography>
                                                         <Typography variant="body2" color="text.secondary">
-                                                            自己添加时间段选项（晚餐时间段：17:00-18:00 18：00-19：00）
+                                                            {t('createEvent.timeConfig.customMode.description')}
                                                         </Typography>
                                                     </Box>
                                                 </Box>
@@ -452,15 +457,15 @@ export default function EventFormStepper() {
 
                                     {/* Standard Mode Settings */}
                                     {timeMode === 'standard' && (
-                                        <Box sx={{ mt: 3, p: 2.5, backgroundColor: '#F7F7F7', borderRadius: 2 }}>
+                                        <Box sx={{ mt: 3, p: 2.5, backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : '#F7F7F7', borderRadius: 2 }}>
                                             <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 500 }}>
-                                                详细设置
+                                                {t('createEvent.timeConfig.standardMode.settings')}
                                             </Typography>
                                             <Stack spacing={2}>
                                                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
                                                     <TextField
                                                         type="time"
-                                                        label="每天开始时间"
+                                                        label={t('createEvent.timeConfig.standardMode.dayStartTime')}
                                                         value={dayStartTime}
                                                         onChange={(e) => setDayStartTime(e.target.value)}
                                                         InputLabelProps={{ shrink: true }}
@@ -468,7 +473,7 @@ export default function EventFormStepper() {
                                                     />
                                                     <TextField
                                                         type="time"
-                                                        label="每天结束时间"
+                                                        label={t('createEvent.timeConfig.standardMode.dayEndTime')}
                                                         value={dayEndTime}
                                                         onChange={(e) => setDayEndTime(e.target.value)}
                                                         InputLabelProps={{ shrink: true }}
@@ -476,28 +481,28 @@ export default function EventFormStepper() {
                                                     />
                                                 </Box>
                                                 <FormControl fullWidth>
-                                                    <InputLabel>时间粒度</InputLabel>
+                                                    <InputLabel>{t('createEvent.timeConfig.standardMode.slotDuration')}</InputLabel>
                                                     <Select
                                                         value={slotMinutes}
-                                                        label="时间粒度"
+                                                        label={t('createEvent.timeConfig.standardMode.slotDuration')}
                                                         onChange={(e) => setSlotMinutes(Number(e.target.value))}
                                                     >
-                                                        <MenuItem value={15}>15 分钟</MenuItem>
-                                                        <MenuItem value={30}>30 分钟</MenuItem>
-                                                        <MenuItem value={60}>60 分钟</MenuItem>
+                                                        <MenuItem value={15}>{t('createEvent.timeConfig.standardMode.minutes', { count: 15 })}</MenuItem>
+                                                        <MenuItem value={30}>{t('createEvent.timeConfig.standardMode.minutes', { count: 30 })}</MenuItem>
+                                                        <MenuItem value={60}>{t('createEvent.timeConfig.standardMode.minutes', { count: 60 })}</MenuItem>
                                                     </Select>
                                                 </FormControl>
                                                 <FormControl fullWidth>
-                                                    <InputLabel>最短活动时长</InputLabel>
+                                                    <InputLabel>{t('createEvent.timeConfig.standardMode.minDuration')}</InputLabel>
                                                     <Select
                                                         value={minDurationMinutes}
-                                                        label="最短活动时长"
+                                                        label={t('createEvent.timeConfig.standardMode.minDuration')}
                                                         onChange={(e) => setMinDurationMinutes(Number(e.target.value))}
                                                     >
-                                                        <MenuItem value={30}>30 分钟</MenuItem>
-                                                        <MenuItem value={60}>60 分钟</MenuItem>
-                                                        <MenuItem value={90}>90 分钟</MenuItem>
-                                                        <MenuItem value={120}>120 分钟</MenuItem>
+                                                        <MenuItem value={30}>{t('createEvent.timeConfig.standardMode.minutes', { count: 30 })}</MenuItem>
+                                                        <MenuItem value={60}>{t('createEvent.timeConfig.standardMode.minutes', { count: 60 })}</MenuItem>
+                                                        <MenuItem value={90}>{t('createEvent.timeConfig.standardMode.minutes', { count: 90 })}</MenuItem>
+                                                        <MenuItem value={120}>{t('createEvent.timeConfig.standardMode.minutes', { count: 120 })}</MenuItem>
                                                     </Select>
                                                 </FormControl>
                                             </Stack>
@@ -505,7 +510,7 @@ export default function EventFormStepper() {
                                             {/* Time Slots Preview */}
                                             <Box sx={{ mt: 3, pt: 2, borderTop: '1px solid #E0E0E0' }}>
                                                 <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 500 }}>
-                                                    时间槽预览
+                                                    {t('createEvent.timeConfig.standardMode.preview')}
                                                 </Typography>
                                                 <Box sx={{
                                                     display: 'flex',
@@ -514,7 +519,7 @@ export default function EventFormStepper() {
                                                     maxHeight: 200,
                                                     overflowY: 'auto',
                                                     p: 1,
-                                                    backgroundColor: 'white',
+                                                    backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.2)' : 'white',
                                                     borderRadius: 1
                                                 }}>
                                                     {(() => {
@@ -551,7 +556,7 @@ export default function EventFormStepper() {
                                                                 })}
                                                                 {totalSlots > 20 && (
                                                                     <Box sx={{ px: 1, py: 0.5, color: 'text.secondary', fontSize: '0.7rem' }}>
-                                                                        ...等{totalSlots - 20}个
+                                                                        {t('createEvent.timeConfig.standardMode.moreSlots', { count: totalSlots - 20 })}
                                                                     </Box>
                                                                 )}
                                                             </>
@@ -564,7 +569,7 @@ export default function EventFormStepper() {
                                                         const [endHour, endMin] = dayEndTime.split(':').map(Number);
                                                         const totalMinutes = (endHour * 60 + endMin) - (startHour * 60 + startMin);
                                                         const totalSlots = Math.floor(totalMinutes / slotMinutes);
-                                                        return `共 ${getDaysCount()} 天 × ${totalSlots} 个时段 = ${getDaysCount() * totalSlots} 个选项`;
+                                                        return t('createEvent.timeConfig.standardMode.slotsCount', { days: getDaysCount(), slots: totalSlots, total: getDaysCount() * totalSlots });
                                                     })()}
                                                 </Typography>
                                             </Box>
@@ -573,42 +578,42 @@ export default function EventFormStepper() {
 
                                     {/* Period Mode Preview */}
                                     {timeMode === 'period' && (
-                                        <Box sx={{ mt: 3, p: 2.5, backgroundColor: '#F7F7F7', borderRadius: 2 }}>
+                                        <Box sx={{ mt: 3, p: 2.5, backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : '#F7F7F7', borderRadius: 2 }}>
                                             <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 500 }}>
-                                                时间段预览
+                                                {t('createEvent.timeConfig.periodMode.preview')}
                                             </Typography>
                                             <Stack spacing={1}>
                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1.5, bgcolor: 'background.paper', borderRadius: 1, border: 1, borderColor: 'divider' }}>
                                                     <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'warning.main' }} />
-                                                    <Typography variant="body2">上午 (09:00 - 12:00)</Typography>
+                                                    <Typography variant="body2">{t('createEvent.timeConfig.periodMode.morning')} (09:00 - 12:00)</Typography>
                                                 </Box>
                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1.5, bgcolor: 'background.paper', borderRadius: 1, border: 1, borderColor: 'divider' }}>
                                                     <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'info.main' }} />
-                                                    <Typography variant="body2">下午 (12:00 - 18:00)</Typography>
+                                                    <Typography variant="body2">{t('createEvent.timeConfig.periodMode.afternoon')} (12:00 - 18:00)</Typography>
                                                 </Box>
                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1.5, bgcolor: 'background.paper', borderRadius: 1, border: 1, borderColor: 'divider' }}>
                                                     <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'info.dark' }} />
-                                                    <Typography variant="body2">晚上 (18:00 - 22:00)</Typography>
+                                                    <Typography variant="body2">{t('createEvent.timeConfig.periodMode.evening')} (18:00 - 22:00)</Typography>
                                                 </Box>
                                             </Stack>
                                             <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: 'block' }}>
-                                                共 {getDaysCount()} 天 × 3 个时段 = {getDaysCount() * 3} 个选项
+                                                {t('createEvent.timeConfig.standardMode.slotsCount', { days: getDaysCount(), slots: 3, total: getDaysCount() * 3 })}
                                             </Typography>
                                         </Box>
                                     )}
 
                                     {/* Custom Mode Settings */}
                                     {timeMode === 'custom' && (
-                                        <Box sx={{ mt: 3, p: 2.5, backgroundColor: '#F7F7F7', borderRadius: 2 }}>
+                                        <Box sx={{ mt: 3, p: 2.5, backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : '#F7F7F7', borderRadius: 2 }}>
                                             <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 500 }}>
-                                                自定义时间段
+                                                {t('createEvent.timeConfig.customMode.sectionTitle')}
                                             </Typography>
 
                                             {/* Existing slots - Preview */}
                                             {customTimeSlots.length > 0 && (
                                                 <Box sx={{ mb: 2 }}>
                                                     <Typography variant="caption" sx={{ mb: 1, display: 'block', fontWeight: 500, color: 'text.secondary' }}>
-                                                        已添加的时间段预览
+                                                        {t('createEvent.timeConfig.customMode.preview')}
                                                     </Typography>
                                                     <Stack spacing={1}>
                                                         {customTimeSlots.map((slot, index) => (
@@ -654,27 +659,27 @@ export default function EventFormStepper() {
                                                                         }
                                                                     }}
                                                                 >
-                                                                    删除
+                                                                    {t('createEvent.timeConfig.customMode.delete')}
                                                                 </Button>
                                                             </Box>
                                                         ))}
                                                     </Stack>
                                                     <Typography variant="caption" color="text.secondary" sx={{ mt: 1.5, display: 'block' }}>
-                                                        共 {getDaysCount()} 天 × {customTimeSlots.length} 个时段 = {getDaysCount() * customTimeSlots.length} 个选项
+                                                        {t('createEvent.timeConfig.standardMode.slotsCount', { days: getDaysCount(), slots: customTimeSlots.length, total: getDaysCount() * customTimeSlots.length })}
                                                     </Typography>
                                                 </Box>
                                             )}
 
                                             {/* Add new slot */}
-                                            <Box sx={{ p: 2, backgroundColor: 'white', borderRadius: 1, border: '1px dashed #E0E0E0' }}>
+                                            <Box sx={{ p: 2, backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.2)' : 'white', borderRadius: 1, border: '1px dashed', borderColor: 'divider' }}>
                                                 <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
-                                                    添加新时间段
+                                                    {t('createEvent.timeConfig.customMode.addNew')}
                                                 </Typography>
                                                 <Stack spacing={1.5}>
                                                     <TextField
                                                         size="small"
-                                                        label="标签"
-                                                        placeholder="例如：下午 4-5"
+                                                        label={t('createEvent.timeConfig.customMode.label')}
+                                                        placeholder={t('createEvent.timeConfig.customMode.labelPlaceholder')}
                                                         value={newSlotLabel}
                                                         onChange={(e) => {
                                                             setNewSlotLabel(e.target.value);
@@ -686,7 +691,7 @@ export default function EventFormStepper() {
                                                         <TextField
                                                             size="small"
                                                             type="time"
-                                                            label="开始时间"
+                                                            label={t('createEvent.timeConfig.customMode.startTime')}
                                                             value={newSlotStart}
                                                             onChange={(e) => {
                                                                 setNewSlotStart(e.target.value);
@@ -697,7 +702,7 @@ export default function EventFormStepper() {
                                                         <TextField
                                                             size="small"
                                                             type="time"
-                                                            label="结束时间"
+                                                            label={t('createEvent.timeConfig.customMode.endTime')}
                                                             value={newSlotEnd}
                                                             onChange={(e) => {
                                                                 setNewSlotEnd(e.target.value);
@@ -721,7 +726,7 @@ export default function EventFormStepper() {
                                                         disabled={!newSlotLabel.trim() || !newSlotStart || !newSlotEnd}
                                                         color="primary"
                                                     >
-                                                        添加时间段
+                                                        {t('createEvent.timeConfig.customMode.addBtn')}
                                                     </Button>
                                                 </Stack>
                                             </Box>
@@ -748,7 +753,7 @@ export default function EventFormStepper() {
                             onClick={handleBack}
                             sx={{ minWidth: 100 }}
                         >
-                            上一步
+                            {t('createEvent.actions.prev')}
                         </Button>
                     )}
                     <Button
@@ -757,7 +762,7 @@ export default function EventFormStepper() {
                         disabled={loading}
                         sx={{ minWidth: 120 }}
                     >
-                        {loading ? '创建中...' : activeStep === 2 ? '创建活动' : '下一步'}
+                        {loading ? t('createEvent.actions.creating') : activeStep === 2 ? t('createEvent.actions.create') : t('createEvent.actions.next')}
                     </Button>
                 </Box>
             </Box>
