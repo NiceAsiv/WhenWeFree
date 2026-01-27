@@ -85,6 +85,11 @@ export default function TimeGrid({
         toggleSlot(slotIndex);
     };
 
+    const handleTouchStart = (slotIndex: number) => {
+        // For touch devices, just toggle the slot without dragging
+        toggleSlot(slotIndex);
+    };
+
     const handleMouseEnter = (slotIndex: number) => {
         if (!isDragging) return;
 
@@ -125,8 +130,6 @@ export default function TimeGrid({
         <Box 
             onMouseUp={handleMouseUp} 
             onMouseLeave={handleMouseUp}
-            onTouchEnd={handleMouseUp}
-            onTouchCancel={handleMouseUp}
         >
             <Paper
                 elevation={0}
@@ -232,21 +235,22 @@ export default function TimeGrid({
                                         <Box
                                             key={slotIndex}
                                             className="time-grid-cell"
-                                            onMouseDown={() => handleMouseDown(slotIndex)}
-                                            onMouseEnter={() => handleMouseEnter(slotIndex)}
-                                            onTouchStart={() => handleMouseDown(slotIndex)}
-                                            onTouchMove={(e) => {
-                                                const touch = e.touches[0];
-                                                const element = document.elementFromPoint(touch.clientX, touch.clientY);
-                                                if (element?.classList.contains('time-grid-cell')) {
-                                                    const allCells = Array.from(document.querySelectorAll('.time-grid-cell'));
-                                                    const cellIndex = allCells.indexOf(element);
-                                                    if (cellIndex >= 0) {
-                                                        handleMouseEnter(cellIndex);
-                                                    }
+                                            onMouseDown={(e) => {
+                                                // Only handle mouse events on non-touch devices
+                                                if (e.type === 'mousedown' && 'ontouchstart' in window) {
+                                                    console.log('[TimeGrid] Ignoring mousedown on touch device');
+                                                    return;
                                                 }
+                                                handleMouseDown(slotIndex);
                                             }}
-                                            onTouchEnd={() => setIsDragging(false)}
+                                            onMouseEnter={() => handleMouseEnter(slotIndex)}
+                                            onTouchStart={(e) => {
+                                                e.stopPropagation();
+                                                handleTouchStart(slotIndex);
+                                            }}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                            }}
                                             sx={{
                                                 height: isAbbreviated ? 26 : 42,
                                                 m: 0.5,

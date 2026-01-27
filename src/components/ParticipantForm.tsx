@@ -43,9 +43,11 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
     // Load existing response when email changes (after debounce)
     useEffect(() => {
         if (!email || !isValidEmail(email)) {
-            setSelectedSlots([]);
-            setIsUpdate(false);
-            setExistingResponseId(null);
+            // Only clear if email is invalid, not if user is typing
+            if (email && !isValidEmail(email)) {
+                setIsUpdate(false);
+                setExistingResponseId(null);
+            }
             return;
         }
 
@@ -72,8 +74,7 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
                     setIsUpdate(true);
                     setExistingResponseId(data.response.id);
                 } else {
-                    // No existing response
-                    setSelectedSlots([]);
+                    // No existing response - DON'T clear slots if user is selecting
                     setIsUpdate(false);
                     setExistingResponseId(null);
                 }
