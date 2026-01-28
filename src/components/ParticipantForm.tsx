@@ -8,6 +8,7 @@ import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import TimeGrid from './TimeGrid';
 import { Event } from '@/types';
 import { format, addDays } from 'date-fns';
+import { storeEmailLocally, getStoredEmail } from '@/lib/crypto';
 
 interface ParticipantFormProps {
     event: Event;
@@ -32,7 +33,7 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
 
     // Load saved email from localStorage on mount
     useEffect(() => {
-        const savedEmail = localStorage.getItem(`userEmail_${event.id}`);
+        const savedEmail = getStoredEmail(event.id);
         if (savedEmail) {
             setEmail(savedEmail);
             // Auto-load existing data
@@ -63,7 +64,16 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
 
         setLoadingExisting(true);
         try {
-            const response = await fetch(`/api/events/${event.id}/responses?email=${encodeURIComponent(userEmail)}`);
+            // Use PUT method with email in body instead of URL params for security
+            const response = await fetch(`/api/events/${event.id}/responses`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: userEmail.trim().toLowerCase(),
+                }),
+            });
 
             if (response.ok) {
                 const data = await response.json();
@@ -201,8 +211,8 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
             setIsUpdate(data.isUpdate);
             setExistingResponseId(data.response.id);
 
-            // Save email to localStorage for next time
-            localStorage.setItem(`userEmail_${event.id}`, email.trim().toLowerCase());
+            // Save email to localStorage for next time (using secure storage)
+            storeEmailLocally(event.id, email.trim().toLowerCase());
         } catch (err) {
             setError(err instanceof Error ? err.message : '提交失败，请重试');
         } finally {

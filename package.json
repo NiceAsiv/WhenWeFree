@@ -7,7 +7,8 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "test:api": "node scripts/test-api.js"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
