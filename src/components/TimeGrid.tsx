@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useMemo } from 'react';
-import { Box, Paper, Typography } from '@mui/material';
+import { Box, Paper, Typography, Tooltip } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { Event } from '@/types';
 import { format, addDays } from 'date-fns';
@@ -12,6 +12,7 @@ interface TimeGridProps {
     onSlotsChange: (slots: number[]) => void;
     heatmapData?: number[];
     maxCount?: number;
+    slotAvailability?: Record<number, { available: string[], unavailable: string[] }>;
 }
 
 export default function TimeGrid({
@@ -20,6 +21,7 @@ export default function TimeGrid({
     onSlotsChange,
     heatmapData,
     maxCount,
+    slotAvailability,
 }: TimeGridProps) {
     const theme = useTheme();
     const isDark = theme.palette.mode === 'dark';
@@ -121,6 +123,28 @@ export default function TimeGrid({
             return heatmapData[slotIndex] || 0;
         }
         return '';
+    };
+
+    const getSlotTooltip = (slotIndex: number) => {
+        if (!slotAvailability || !slotAvailability[slotIndex]) {
+            return '';
+        }
+        
+        const { available, unavailable } = slotAvailability[slotIndex];
+        
+        if (unavailable.length === 0) {
+            return `✅ 全部可用: ${available.join(', ')}`;
+        }
+        
+        const parts = [];
+        if (available.length > 0) {
+            parts.push(`✅ 可用 (${available.length}): ${available.join(', ')}`);
+        }
+        if (unavailable.length > 0) {
+            parts.push(`❌ 不可用 (${unavailable.length}): ${unavailable.join(', ')}`);
+        }
+        
+        return parts.join('\n');
     };
 
     // Determine if we should show abbreviated view (more than 3 slots per day)
@@ -231,7 +255,9 @@ export default function TimeGrid({
                                 {Array.from({ length: slotsPerDay }).map((_, slotInDay) => {
                                     const slotIndex = dayIndex * slotsPerDay + slotInDay;
                                     const isSelected = selectedSlots.includes(slotIndex);
-                                    return (
+                                    const tooltipText = getSlotTooltip(slotIndex);
+                                    
+                                    const slotBox = (
                                         <Box
                                             key={slotIndex}
                                             className="time-grid-cell"
@@ -310,6 +336,18 @@ export default function TimeGrid({
                                             {getSlotLabel(slotIndex)}
                                         </Box>
                                     );
+                                    
+                                    // Wrap with Tooltip only if we have tooltip text (heatmap mode with availability data)
+                                    return tooltipText ? (
+                                        <Tooltip 
+                                            key={slotIndex} 
+                                            title={<span style={{ whiteSpace: 'pre-line' }}>{tooltipText}</span>}
+                                            arrow
+                                            placement="top"
+                                        >
+                                            {slotBox}
+                                        </Tooltip>
+                                    ) : slotBox;
                                 })}
                             </Box>
                         );

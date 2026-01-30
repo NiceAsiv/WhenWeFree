@@ -13,7 +13,10 @@ import {
     Chip,
     CircularProgress,
     Alert,
+    Collapse,
+    IconButton,
 } from '@mui/material';
+import { ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
 import { addDays } from 'date-fns';
 import TimeGrid from './TimeGrid';
 import { useTranslation } from "@/hooks/useTranslation";
@@ -29,6 +32,7 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
     const [tabValue, setTabValue] = useState(0);
     const [resultsData, setResultsData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [expandedSlot, setExpandedSlot] = useState<number | null>(null);
 
     useEffect(() => {
         fetchResults();
@@ -133,7 +137,7 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
         );
     }
 
-    const { slotCounts, commonSlots, recommendedSlots, totalParticipants } = resultsData;
+    const { slotCounts, commonSlots, recommendedSlots, totalParticipants, slotAvailability } = resultsData;
     const maxCount = Math.max(...slotCounts, 1);
 
     return (
@@ -160,6 +164,7 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
                         onSlotsChange={() => { }}
                         heatmapData={slotCounts}
                         maxCount={maxCount}
+                        slotAvailability={slotAvailability}
                     />
                     <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
                         <Typography variant="body2" color="text.secondary">0 {t('resultsPage.people')}</Typography>
@@ -238,39 +243,88 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
                             {recommendedSlots.map((slot: any, idx: number) => {
                                 // Get the slot index with minimum count
                                 const slotIndex = slot.slots[0];
+                                const unavailableUsers = slotAvailability?.[slotIndex]?.unavailable || [];
+                                const hasConflict = unavailableUsers.length > 0;
+                                const isExpanded = expandedSlot === idx;
+                                
                                 return (
-                                    <ListItem
-                                        key={idx}
-                                        sx={{
-                                            borderRadius: 2,
-                                            mb: 1,
-                                            backgroundColor: idx === 0 ? 'primary.lighter' : 'background.paper',
-                                            border: '1px solid',
-                                            borderColor: idx === 0 ? 'primary.main' : 'divider',
-                                            '&:hover': {
-                                                backgroundColor: idx === 0 ? 'primary.light' : 'action.hover',
-                                            },
-                                        }}
-                                    >
-                                        <ListItemText
-                                            primary={
-                                                <Box>
-                                                    <Typography variant="body1" fontWeight={600}>
-                                                        {idx === 0 && '🏆 '}{t('resultsPage.recommended')} {idx + 1}
+                                    <Box key={idx}>
+                                        <ListItem
+                                            sx={{
+                                                borderRadius: 2,
+                                                mb: hasConflict && isExpanded ? 0 : 1,
+                                                backgroundColor: idx === 0 ? 'primary.lighter' : 'background.paper',
+                                                border: '1px solid',
+                                                borderColor: idx === 0 ? 'primary.main' : 'divider',
+                                                '&:hover': {
+                                                    backgroundColor: idx === 0 ? 'primary.light' : 'action.hover',
+                                                },
+                                            }}
+                                        >
+                                            <ListItemText
+                                                primary={
+                                                    <Box>
+                                                        <Typography variant="body1" fontWeight={600}>
+                                                            {idx === 0 && '🏆 '}{t('resultsPage.recommended')} {idx + 1}
+                                                        </Typography>
+                                                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                                                            {slot.slots.map((si: number) => getSlotTimeRange(si)).join(', ')}
+                                                        </Typography>
+                                                    </Box>
+                                                }
+                                                secondary={`${t('resultsPage.minCount', { count: slot.minCount })}，${t('resultsPage.avgCount', { count: slot.averageCount.toFixed(1) })}`}
+                                            />
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                <Chip
+                                                    label={`${slot.minCount}/${totalParticipants} ${t('resultsPage.people')}`}
+                                                    color={idx === 0 ? "primary" : "default"}
+                                                    sx={{ fontWeight: 600 }}
+                                                />
+                                                {hasConflict && (
+                                                    <IconButton
+                                                        size="small"
+                                                        onClick={() => setExpandedSlot(isExpanded ? null : idx)}
+                                                        sx={{
+                                                            transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                                                            transition: 'transform 0.3s',
+                                                        }}
+                                                    >
+                                                        <ExpandMoreIcon />
+                                                    </IconButton>
+                                                )}
+                                            </Box>
+                                        </ListItem>
+                                        {hasConflict && (
+                                            <Collapse in={isExpanded}>
+                                                <Box
+                                                    sx={{
+                                                        px: 3,
+                                                        py: 2,
+                                                        mb: 1,
+                                                        backgroundColor: 'action.hover',
+                                                        borderRadius: 2,
+                                                        border: '1px solid',
+                                                        borderColor: 'divider',
+                                                    }}
+                                                >
+                                                    <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>
+                                                        {t('resultsPage.unavailableUsers')}:
                                                     </Typography>
-                                                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                                                        {slot.slots.map((si: number) => getSlotTimeRange(si)).join(', ')}
-                                                    </Typography>
+                                                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                                                        {unavailableUsers.map((user: string, userIdx: number) => (
+                                                            <Chip
+                                                                key={userIdx}
+                                                                label={user}
+                                                                size="small"
+                                                                color="warning"
+                                                                sx={{ fontWeight: 500 }}
+                                                            />
+                                                        ))}
+                                                    </Box>
                                                 </Box>
-                                            }
-                                            secondary={`${t('resultsPage.minCount', { count: slot.minCount })}，${t('resultsPage.avgCount', { count: slot.averageCount.toFixed(1) })}`}
-                                        />
-                                        <Chip
-                                            label={`${slot.minCount}/${totalParticipants} ${t('resultsPage.people')}`}
-                                            color={idx === 0 ? "primary" : "default"}
-                                            sx={{ fontWeight: 600 }}
-                                        />
-                                    </ListItem>
+                                            </Collapse>
+                                        )}
+                                    </Box>
                                 );
                             })}
                         </List>

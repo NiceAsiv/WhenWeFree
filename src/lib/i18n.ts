@@ -71,6 +71,7 @@ export const translations = {
             slotsSelected: '已选择 {count} 个时间段',
             anonymousParticipant: '匿名参与者',
             people: '人',
+            unavailableUsers: '不可用的用户',
         },
 
         // Create Event Page

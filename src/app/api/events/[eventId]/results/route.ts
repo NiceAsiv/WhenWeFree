@@ -30,12 +30,27 @@ export async function GET(
 
         // Aggregate availability data
         const slotCounts = new Array(totalSlots).fill(0);
+        // Track which users are available for each slot
+        const slotAvailability: Map<number, { available: string[], unavailable: string[] }> = new Map();
+        
+        // Initialize slot availability
+        for (let i = 0; i < totalSlots; i++) {
+            slotAvailability.set(i, { available: [], unavailable: [] });
+        }
+        
         event.responses.forEach((response) => {
-            (response.availabilitySlots as number[]).forEach((slotIndex: number) => {
-                if (slotIndex >= 0 && slotIndex < totalSlots) {
+            const userName = response.name || response.email;
+            const availableSlots = new Set(response.availabilitySlots as number[]);
+            
+            for (let slotIndex = 0; slotIndex < totalSlots; slotIndex++) {
+                const slotInfo = slotAvailability.get(slotIndex)!;
+                if (availableSlots.has(slotIndex)) {
+                    slotInfo.available.push(userName);
                     slotCounts[slotIndex]++;
+                } else {
+                    slotInfo.unavailable.push(userName);
                 }
-            });
+            }
         });
 
         // Find common slots (all participants available)
@@ -49,12 +64,19 @@ export async function GET(
             event.minDurationMinutes || 30 // Provide default if null
         );
 
+        // Convert slotAvailability Map to object for JSON serialization
+        const slotAvailabilityObj: Record<number, { available: string[], unavailable: string[] }> = {};
+        slotAvailability.forEach((value, key) => {
+            slotAvailabilityObj[key] = value;
+        });
+
         return NextResponse.json({
             event,
             slotCounts,
             commonSlots,
             recommendedSlots,
             totalParticipants,
+            slotAvailability: slotAvailabilityObj,
         });
     } catch (error) {
         console.error("Error fetching results:", error);
