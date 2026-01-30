@@ -20,7 +20,7 @@ import { ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
 import { addDays } from 'date-fns';
 import TimeGrid from './TimeGrid';
 import { useTranslation } from "@/hooks/useTranslation";
-import { Event, Response } from '@/types';
+import { Event, Response, ResultsData } from '@/types';
 
 interface ResultsViewProps {
     event: Event;
@@ -30,7 +30,7 @@ interface ResultsViewProps {
 export default function ResultsView({ event, responses }: ResultsViewProps) {
     const { t } = useTranslation();
     const [tabValue, setTabValue] = useState(0);
-    const [resultsData, setResultsData] = useState<any>(null);
+    const [resultsData, setResultsData] = useState<ResultsData | null>(null);
     const [loading, setLoading] = useState(true);
     const [expandedSlot, setExpandedSlot] = useState<number | null>(null);
 
@@ -43,6 +43,8 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
             const response = await fetch(`/api/events/${event.id}/results`);
             const data = await response.json();
             setResultsData(data);
+            // Reset expanded slot when data changes
+            setExpandedSlot(null);
         } catch (error) {
             console.error('Failed to fetch results:', error);
         } finally {
@@ -241,9 +243,13 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
                     ) : (
                         <List>
                             {recommendedSlots.map((slot: any, idx: number) => {
-                                // Get the slot index with minimum count
-                                const slotIndex = slot.slots[0];
-                                const unavailableUsers = slotAvailability?.[slotIndex]?.unavailable || [];
+                                // Collect unavailable users from all slots in the recommendation
+                                const allUnavailableUsers = new Set<string>();
+                                slot.slots.forEach((slotIdx: number) => {
+                                    const unavailable = slotAvailability?.[slotIdx]?.unavailable || [];
+                                    unavailable.forEach((user: string) => allUnavailableUsers.add(user));
+                                });
+                                const unavailableUsers = Array.from(allUnavailableUsers);
                                 const hasConflict = unavailableUsers.length > 0;
                                 const isExpanded = expandedSlot === idx;
                                 

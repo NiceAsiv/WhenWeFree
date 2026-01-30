@@ -72,6 +72,9 @@ export const translations = {
             anonymousParticipant: '匿名参与者',
             people: '人',
             unavailableUsers: '不可用的用户',
+            allAvailableTooltip: '全部可用',
+            availableTooltip: '可用',
+            unavailableTooltip: '不可用',
         },
 
         // Create Event Page
@@ -276,6 +279,10 @@ export const translations = {
             slotsSelected: '{count} slots selected',
             anonymousParticipant: 'Anonymous',
             people: 'people',
+            unavailableUsers: 'Unavailable Users',
+            allAvailableTooltip: 'All Available',
+            availableTooltip: 'Available',
+            unavailableTooltip: 'Unavailable',
         },
 
         // Create Event Page

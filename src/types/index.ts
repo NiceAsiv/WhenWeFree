@@ -55,3 +55,25 @@ export interface EventFormData {
     minDurationMinutes?: number;
     customTimeSlots?: CustomTimeSlot[];
 }
+
+export interface RecommendedSlot {
+    slots: number[];
+    startTime: Date;
+    endTime: Date;
+    averageCount: number;
+    minCount: number;
+}
+
+export interface SlotAvailability {
+    available: string[];
+    unavailable: string[];
+}
+
+export interface ResultsData {
+    event: Event;
+    slotCounts: number[];
+    commonSlots: number[];
+    recommendedSlots: RecommendedSlot[];
+    totalParticipants: number;
+    slotAvailability: Record<number, SlotAvailability>;
+}

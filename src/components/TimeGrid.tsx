@@ -5,6 +5,7 @@ import { Box, Paper, Typography, Tooltip } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { Event } from '@/types';
 import { format, addDays } from 'date-fns';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface TimeGridProps {
     event: Event;
@@ -23,6 +24,7 @@ export default function TimeGrid({
     maxCount,
     slotAvailability,
 }: TimeGridProps) {
+    const { t } = useTranslation();
     const theme = useTheme();
     const isDark = theme.palette.mode === 'dark';
     const [isDragging, setIsDragging] = useState(false);
@@ -133,15 +135,15 @@ export default function TimeGrid({
         const { available, unavailable } = slotAvailability[slotIndex];
         
         if (unavailable.length === 0) {
-            return `✅ 全部可用: ${available.join(', ')}`;
+            return `✅ ${t('resultsPage.allAvailableTooltip')}: ${available.join(', ')}`;
         }
         
         const parts = [];
         if (available.length > 0) {
-            parts.push(`✅ 可用 (${available.length}): ${available.join(', ')}`);
+            parts.push(`✅ ${t('resultsPage.availableTooltip')} (${available.length}): ${available.join(', ')}`);
         }
         if (unavailable.length > 0) {
-            parts.push(`❌ 不可用 (${unavailable.length}): ${unavailable.join(', ')}`);
+            parts.push(`❌ ${t('resultsPage.unavailableTooltip')} (${unavailable.length}): ${unavailable.join(', ')}`);
         }
         
         return parts.join('\n');

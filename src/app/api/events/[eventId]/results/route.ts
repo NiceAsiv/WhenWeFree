@@ -38,20 +38,23 @@ export async function GET(
             slotAvailability.set(i, { available: [], unavailable: [] });
         }
         
-        event.responses.forEach((response: { name: string | null; email: string; availabilitySlots: unknown }) => {
-            const userName = response.name || response.email;
-            const availableSlots = new Set(response.availabilitySlots as number[]);
-            
-            for (let slotIndex = 0; slotIndex < totalSlots; slotIndex++) {
-                const slotInfo = slotAvailability.get(slotIndex)!;
-                if (availableSlots.has(slotIndex)) {
-                    slotInfo.available.push(userName);
-                    slotCounts[slotIndex]++;
-                } else {
-                    slotInfo.unavailable.push(userName);
+        // Only track availability if there are responses
+        if (event.responses.length > 0) {
+            event.responses.forEach((response: { name: string | null; email: string; availabilitySlots: unknown }) => {
+                const userName = response.name || response.email;
+                const availableSlots = new Set(response.availabilitySlots as number[]);
+                
+                for (let slotIndex = 0; slotIndex < totalSlots; slotIndex++) {
+                    const slotInfo = slotAvailability.get(slotIndex)!;
+                    if (availableSlots.has(slotIndex)) {
+                        slotInfo.available.push(userName);
+                        slotCounts[slotIndex]++;
+                    } else {
+                        slotInfo.unavailable.push(userName);
+                    }
                 }
-            }
-        });
+            });
+        }
 
         // Find common slots (all participants available)
         const totalParticipants = event.responses.length;
