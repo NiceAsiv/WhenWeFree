@@ -13,11 +13,17 @@ import {
     Chip,
     CircularProgress,
     Alert,
+    FormControl,
+    Select,
+    MenuItem,
+    InputLabel,
 } from '@mui/material';
+import PublicIcon from '@mui/icons-material/Public';
 import { addDays } from 'date-fns';
 import TimeGrid from './TimeGrid';
 import { useTranslation } from "@/hooks/useTranslation";
 import { Event, Response } from '@/types';
+import { TIMEZONES, getTimezoneLabel } from '@/lib/timezones';
 
 interface ResultsViewProps {
     event: Event;
@@ -29,6 +35,7 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
     const [tabValue, setTabValue] = useState(0);
     const [resultsData, setResultsData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [viewTimezone, setViewTimezone] = useState<string>(event.timezone);
 
     useEffect(() => {
         fetchResults();
@@ -138,6 +145,53 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
 
     return (
         <Box>
+            {/* Timezone Selector */}
+            <Paper elevation={1} sx={{ p: 2.5, mb: 3, border: '1px solid', borderColor: 'divider' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2.5 }}>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: 32,
+                            height: 32,
+                            borderRadius: '50%',
+                            bgcolor: 'primary.main',
+                            color: 'white',
+                        }}
+                    >
+                        <PublicIcon sx={{ fontSize: 18 }} />
+                    </Box>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                        查看时区
+                    </Typography>
+                </Box>
+                <Box sx={{ mb: 1 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+                        活动时区：<Box component="span" sx={{ fontWeight: 600, color: 'text.primary' }}>{getTimezoneLabel(event.timezone)}</Box>
+                    </Typography>
+                    <FormControl fullWidth size="small">
+                        <InputLabel>选择查看时间的时区</InputLabel>
+                        <Select
+                            value={viewTimezone}
+                            label="选择查看时间的时区"
+                            onChange={(e) => setViewTimezone(e.target.value)}
+                        >
+                            {TIMEZONES.map((tz) => (
+                                <MenuItem key={tz.value} value={tz.value}>
+                                    {tz.label}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                </Box>
+                {viewTimezone !== event.timezone && (
+                    <Alert severity="info" sx={{ mt: 1.5, fontSize: '0.875rem' }}>
+                        你正在以 <strong>{getTimezoneLabel(viewTimezone)}</strong> 查看结果。所有时间已从活动时区转换。
+                    </Alert>
+                )}
+            </Paper>
+
             <Paper sx={{ mb: 3 }}>
                 <Tabs value={tabValue} onChange={(_, v) => setTabValue(v)}>
                     <Tab label={t('resultsPage.heatmap')} />
@@ -160,6 +214,7 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
                         onSlotsChange={() => { }}
                         heatmapData={slotCounts}
                         maxCount={maxCount}
+                        viewTimezone={viewTimezone}
                     />
                     <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
                         <Typography variant="body2" color="text.secondary">0 {t('resultsPage.people')}</Typography>

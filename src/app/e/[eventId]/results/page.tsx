@@ -6,11 +6,13 @@ import { Container, Typography, Box, IconButton, CircularProgress } from "@mui/m
 import Link from "next/link";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ShareIcon from "@mui/icons-material/Share";
+import PublicIcon from "@mui/icons-material/Public";
 import ResultsView from "@/components/ResultsView";
 import SettingsMenu from "@/components/SettingsMenu";
 import ShareDialog from "@/components/ShareDialog";
 import { useTranslation } from "@/hooks/useTranslation";
 import { Event, Response } from "@/types";
+import { getTimezoneLabel } from '@/lib/timezones';
 
 interface ResultsPageProps {
     params: Promise<{
@@ -106,9 +108,17 @@ export default function ResultsPage({ params }: ResultsPageProps) {
                 >
                     {t('resultsPage.title', { title: event.title })}
                 </Typography>
-                <Typography variant="body1" color="text.secondary">
-                    {t('resultsPage.responsesCount', { count: event.responses.length })}
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <Typography variant="body1" color="text.secondary">
+                        {t('resultsPage.responsesCount', { count: event.responses.length })}
+                    </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 1 }}>
+                    <PublicIcon sx={{ fontSize: 18, color: 'primary.main' }} />
+                    <Typography variant="body2" color="primary.main" sx={{ fontWeight: 500 }}>
+                        {getTimezoneLabel(event.timezone)}
+                    </Typography>
+                </Box>
             </Box>
             <ResultsView event={event} responses={event.responses} />
 

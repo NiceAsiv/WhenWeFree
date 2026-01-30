@@ -1,14 +1,16 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Paper, TextField, Button, Box, Alert, Typography, CircularProgress, Chip, Divider } from '@mui/material';
+import { Paper, TextField, Button, Box, Alert, Typography, CircularProgress, Chip, Divider, FormControl, Select, MenuItem, InputLabel } from '@mui/material';
 import Link from 'next/link';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import PublicIcon from '@mui/icons-material/Public';
 import TimeGrid from './TimeGrid';
 import { Event } from '@/types';
 import { format, addDays } from 'date-fns';
 import { storeEmailLocally, getStoredEmail } from '@/lib/crypto';
+import { getTimezoneLabel, getUserTimezone, TIMEZONES } from '@/lib/timezones';
 
 interface ParticipantFormProps {
     event: Event;
@@ -24,6 +26,13 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
     const [success, setSuccess] = useState(false);
     const [isUpdate, setIsUpdate] = useState(false);
     const [existingResponseId, setExistingResponseId] = useState<string | null>(null);
+    // 用户选择的查看时区，默认使用活动时区
+    const [viewTimezone, setViewTimezone] = useState<string>(event.timezone);
+
+    // 初始化时设置默认查看时区为活动时区
+    useEffect(() => {
+        setViewTimezone(event.timezone);
+    }, [event.timezone]);
 
     // Email validation
     const isValidEmail = (email: string): boolean => {
@@ -232,6 +241,70 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
                     background: 'linear-gradient(to bottom, #ffffff, #fafafa)',
                 }}
             >
+                {/* Timezone Selector */}
+                <Paper
+                    elevation={1}
+                    sx={{ 
+                        mb: 3,
+                        p: 2.5,
+                        borderRadius: 2,
+                        border: '1px solid',
+                        borderColor: 'divider',
+                    }}
+                >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2.5 }}>
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: 32,
+                                height: 32,
+                                borderRadius: '50%',
+                                bgcolor: 'primary.main',
+                                color: 'white',
+                            }}
+                        >
+                            <PublicIcon sx={{ fontSize: 18 }} />
+                        </Box>
+                        <Typography 
+                            variant="subtitle1" 
+                            sx={{ 
+                                fontWeight: 600, 
+                                color: 'text.primary',
+                            }}
+                        >
+                            时区设置
+                        </Typography>
+                    </Box>
+
+                    <Box sx={{ mb: 2 }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+                            活动时区：<Box component="span" sx={{ fontWeight: 600, color: 'text.primary' }}>{getTimezoneLabel(event.timezone)}</Box>
+                        </Typography>
+                        <FormControl fullWidth size="small">
+                            <InputLabel>选择你查看时间的时区</InputLabel>
+                            <Select
+                                value={viewTimezone}
+                                label="选择你查看时间的时区"
+                                onChange={(e) => setViewTimezone(e.target.value)}
+                            >
+                                {TIMEZONES.map((tz) => (
+                                    <MenuItem key={tz.value} value={tz.value}>
+                                        {tz.label}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </Box>
+
+                    {viewTimezone !== event.timezone && (
+                        <Alert severity="info" sx={{ fontSize: '0.875rem' }}>
+                            你正在以 <strong>{getTimezoneLabel(viewTimezone)}</strong> 查看时间。你选择的时间会自动转换为活动时区保存。
+                        </Alert>
+                    )}
+                </Paper>
+
                 <form onSubmit={handleSubmit}>
                     {/* Name Input Section */}
                     <Box sx={{ mb: { xs: 3, sm: 4 } }}>
@@ -307,12 +380,30 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
                         </Typography>
                         <Typography variant="body2" color="text.secondary" sx={{ mb: { xs: 2, sm: 3 } }}>
                             点击或拖拽选择时间段，绿色表示已选中
+                            {viewTimezone !== event.timezone && (
+                                <Box component="span" sx={{ 
+                                    display: 'block', 
+                                    mt: 1, 
+                                    px: 1.5, 
+                                    py: 0.5, 
+                                    borderRadius: 1, 
+                                    bgcolor: 'rgba(16, 174, 255, 0.08)', 
+                                    color: 'info.main', 
+                                    fontWeight: 500, 
+                                    fontSize: '0.8125rem',
+                                    border: '1px solid',
+                                    borderColor: 'rgba(16, 174, 255, 0.2)',
+                                }}>
+                                    当前显示时区：{getTimezoneLabel(viewTimezone)}
+                                </Box>
+                            )}
                         </Typography>
 
                         <TimeGrid
                             event={event}
                             selectedSlots={selectedSlots}
                             onSlotsChange={setSelectedSlots}
+                            viewTimezone={viewTimezone}
                         />
                     </Box>
 
