@@ -38,7 +38,7 @@ export async function GET(
             slotAvailability.set(i, { available: [], unavailable: [] });
         }
         
-        event.responses.forEach((response) => {
+        event.responses.forEach((response: { name: string | null; email: string; availabilitySlots: unknown }) => {
             const userName = response.name || response.email;
             const availableSlots = new Set(response.availabilitySlots as number[]);
             
