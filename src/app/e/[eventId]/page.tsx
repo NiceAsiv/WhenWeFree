@@ -87,11 +87,11 @@ export default function EventPage({ params }: EventPageProps) {
                 }}>
                     <Box>
                         <Typography
-                            variant="h3"
+                            variant="h2"
                             component="h1"
                             sx={{
                                 fontWeight: 700,
-                                fontSize: { xs: '2rem', sm: '2.5rem' },
+                                fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' },
                                 mb: 1,
                                 background: 'linear-gradient(135deg, #1AAD19 0%, #2BA245 100%)',
                                 WebkitBackgroundClip: 'text',

@@ -82,7 +82,7 @@ function ThemeContent({ children }: { children: ReactNode }) {
             divider: darkMode ? '#333333' : wechatColors.backgroundGrey,
         },
         typography: {
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif',
+            fontFamily: '"HarmonyOS Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif',
             h1: {
                 fontWeight: 600,
                 fontSize: '1.75rem',

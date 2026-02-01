@@ -14,6 +14,7 @@ interface TimeGridProps {
     heatmapData?: number[];
     maxCount?: number;
     viewTimezone?: string; // 用户选择的查看时区
+    onSlotClick?: (slotIndex: number) => void; // 点击时间槽的回调
 }
 
 export default function TimeGrid({
@@ -23,6 +24,7 @@ export default function TimeGrid({
     heatmapData,
     maxCount,
     viewTimezone,
+    onSlotClick,
 }: TimeGridProps) {
     const theme = useTheme();
     const isDark = theme.palette.mode === 'dark';
@@ -43,11 +45,14 @@ export default function TimeGrid({
         return Array.from({ length: daysDiff }).map((_, i) => {
             const currentDay = addDays(startDate, i);
             // 如果需要时区转换，将日期转换到显示时区
-            if (isTimezoneConverted) {
-                const zonedDate = toZonedTime(currentDay, displayTimezone);
-                return format(zonedDate, 'M/d\nEEE');
-            }
-            return format(currentDay, 'M/d\nEEE');
+            const dateToFormat = isTimezoneConverted 
+                ? toZonedTime(currentDay, displayTimezone)
+                : currentDay;
+            
+            return {
+                date: format(dateToFormat, 'M/d'),
+                day: format(dateToFormat, 'EEE'),
+            };
         });
     }, [startDate, daysDiff, displayTimezone, isTimezoneConverted]);
 
@@ -112,6 +117,12 @@ export default function TimeGrid({
     }, [selectedSlots, onSlotsChange]);
 
     const handleMouseDown = (slotIndex: number) => {
+        // If in heatmap mode and onSlotClick is provided, just trigger the click
+        if (heatmapData && onSlotClick) {
+            onSlotClick(slotIndex);
+            return;
+        }
+        
         setIsDragging(true);
         const isSelected = selectedSlots.includes(slotIndex);
         setDragMode(isSelected ? 'deselect' : 'select');
@@ -119,6 +130,12 @@ export default function TimeGrid({
     };
 
     const handleTouchStart = (slotIndex: number) => {
+        // If in heatmap mode and onSlotClick is provided, just trigger the click
+        if (heatmapData && onSlotClick) {
+            onSlotClick(slotIndex);
+            return;
+        }
+        
         // For touch devices, just toggle the slot without dragging
         toggleSlot(slotIndex);
     };
@@ -201,7 +218,7 @@ export default function TimeGrid({
                         minWidth: { xs: 70, sm: event.mode === 'fullDay' ? 60 : 100 },
                         flexShrink: 0,
                     }}>
-                        <Box sx={{ height: { xs: 44, sm: 48 }, mb: 0.5 }} /> {/* Header spacer */}
+                        <Box sx={{ height: { xs: 50, sm: 56 }, mb: 0.5 }} /> {/* Header spacer */}
                         {slotLabels.map((label, i) => (
                             <Box
                                 key={i}
@@ -237,29 +254,41 @@ export default function TimeGrid({
                                 {/* Day header */}
                                 <Box
                                     sx={{
-                                        height: { xs: 44, sm: 48 },
+                                        height: { xs: 50, sm: 56 },
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         fontWeight: 600,
-                                        fontSize: { xs: '0.8125rem', sm: '0.9375rem' },
                                         borderBottom: '2px solid',
                                         borderColor: 'divider',
                                         mb: 0.5,
+                                        py: 0.75,
                                     }}
                                 >
-                                    <div>
-                                        <div style={{ fontWeight: 600 }}>
-                                            {dayLabels[dayIndex].split('\n')[1]}
-                                        </div>
-                                        <div style={{
-                                            fontSize: window.innerWidth < 600 ? '0.75rem' : '0.8125rem',
-                                            color: isDark ? '#aaa' : '#888',
-                                            fontWeight: 500
+                                    <Box sx={{ 
+                                        display: 'flex', 
+                                        flexDirection: 'column', 
+                                        alignItems: 'center', 
+                                        justifyContent: 'center',
+                                        gap: 0.25,
+                                    }}>
+                                        <Typography sx={{ 
+                                            fontWeight: 700,
+                                            fontSize: { xs: '0.9375rem', sm: '1rem' },
+                                            color: 'text.primary',
+                                            lineHeight: 1.2,
                                         }}>
-                                            {dayLabels[dayIndex].split('\n')[0]}
-                                        </div>
-                                    </div>
+                                            {dayLabels[dayIndex].date}
+                                        </Typography>
+                                        <Typography sx={{
+                                            fontSize: { xs: '0.6875rem', sm: '0.75rem' },
+                                            color: 'text.secondary',
+                                            fontWeight: 500,
+                                            lineHeight: 1.2,
+                                        }}>
+                                            {dayLabels[dayIndex].day}
+                                        </Typography>
+                                    </Box>
                                 </Box>
 
                                 {/* Time slots for this day */}

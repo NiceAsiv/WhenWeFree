@@ -6,6 +6,7 @@ import Link from 'next/link';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import PublicIcon from '@mui/icons-material/Public';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 import TimeGrid from './TimeGrid';
 import { Event } from '@/types';
 import { format, addDays } from 'date-fns';
@@ -26,13 +27,13 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
     const [success, setSuccess] = useState(false);
     const [isUpdate, setIsUpdate] = useState(false);
     const [existingResponseId, setExistingResponseId] = useState<string | null>(null);
-    // 用户选择的查看时区，默认使用活动时区
-    const [viewTimezone, setViewTimezone] = useState<string>(event.timezone);
+    // 用户选择的查看时区，默认使用北京时间
+    const [viewTimezone, setViewTimezone] = useState<string>('Asia/Shanghai');
 
-    // 初始化时设置默认查看时区为活动时区
+    // 初始化时设置默认查看时区为北京时间
     useEffect(() => {
-        setViewTimezone(event.timezone);
-    }, [event.timezone]);
+        setViewTimezone('Asia/Shanghai');
+    }, []);
 
     // Email validation
     const isValidEmail = (email: string): boolean => {
@@ -243,13 +244,14 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
             >
                 {/* Timezone Selector */}
                 <Paper
-                    elevation={1}
+                    elevation={0}
                     sx={{ 
                         mb: 3,
                         p: 2.5,
-                        borderRadius: 2,
+                        borderRadius: 2.5,
                         border: '1px solid',
-                        borderColor: 'divider',
+                        borderColor: 'rgba(26, 173, 25, 0.2)',
+                        background: 'linear-gradient(135deg, rgba(26, 173, 25, 0.03) 0%, rgba(43, 162, 69, 0.05) 100%)',
                     }}
                 >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2.5 }}>
@@ -258,14 +260,15 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                width: 32,
-                                height: 32,
+                                width: 36,
+                                height: 36,
                                 borderRadius: '50%',
-                                bgcolor: 'primary.main',
+                                background: 'linear-gradient(135deg, #1AAD19 0%, #2BA245 100%)',
                                 color: 'white',
+                                boxShadow: '0 2px 8px rgba(26, 173, 25, 0.25)',
                             }}
                         >
-                            <PublicIcon sx={{ fontSize: 18 }} />
+                            <PublicIcon sx={{ fontSize: 20 }} />
                         </Box>
                         <Typography 
                             variant="subtitle1" 
@@ -279,9 +282,6 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
                     </Box>
 
                     <Box sx={{ mb: 2 }}>
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-                            活动时区：<Box component="span" sx={{ fontWeight: 600, color: 'text.primary' }}>{getTimezoneLabel(event.timezone)}</Box>
-                        </Typography>
                         <FormControl fullWidth size="small">
                             <InputLabel>选择你查看时间的时区</InputLabel>
                             <Select
@@ -299,7 +299,19 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
                     </Box>
 
                     {viewTimezone !== event.timezone && (
-                        <Alert severity="info" sx={{ fontSize: '0.875rem' }}>
+                        <Alert 
+                            severity="success" 
+                            sx={{ 
+                                fontSize: '0.875rem',
+                                bgcolor: 'rgba(26, 173, 25, 0.08)',
+                                color: 'primary.main',
+                                borderRadius: 2,
+                                border: '1px solid rgba(26, 173, 25, 0.2)',
+                                '& .MuiAlert-icon': {
+                                    color: 'primary.main',
+                                },
+                            }}
+                        >
                             你正在以 <strong>{getTimezoneLabel(viewTimezone)}</strong> 查看时间。你选择的时间会自动转换为活动时区保存。
                         </Alert>
                     )}
@@ -353,7 +365,7 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
                                     loadingExisting
                                         ? "正在加载已有数据..."
                                         : isUpdate
-                                            ? "✓ 已找到你之前的选择，修改后重新提交即可"
+                                            ? "已加载你的已有数据"
                                             : "输入邮箱后自动保存，下次可以继续修改"
                                 }
                                 InputProps={{
@@ -363,7 +375,15 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
                         </Box>
                     </Box>
 
-                    <Divider sx={{ my: { xs: 3, sm: 4 } }} />
+                    <Divider 
+                        sx={{ 
+                            my: { xs: 3, sm: 4 },
+                            borderColor: 'rgba(26, 173, 25, 0.25)',
+                            '&::before, &::after': {
+                                borderColor: 'rgba(26, 173, 25, 0.25)',
+                            }
+                        }} 
+                    />
 
                     {/* Time Selection Section */}
                     <Box sx={{ mb: { xs: 3, sm: 4 } }}>
@@ -374,37 +394,44 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
                                 fontWeight: 600,
                                 color: 'text.primary',
                                 fontSize: { xs: '1rem', sm: '1.25rem' },
+                                textAlign: 'center',
                             }}
                         >
                             选择你的空闲时间
                         </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: { xs: 2, sm: 3 } }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: { xs: 2, sm: 3 }, textAlign: 'center' }}>
                             点击或拖拽选择时间段，绿色表示已选中
                             {viewTimezone !== event.timezone && (
                                 <Box component="span" sx={{ 
-                                    display: 'block', 
-                                    mt: 1, 
-                                    px: 1.5, 
-                                    py: 0.5, 
-                                    borderRadius: 1, 
-                                    bgcolor: 'rgba(16, 174, 255, 0.08)', 
-                                    color: 'info.main', 
-                                    fontWeight: 500, 
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: 0.5,
+                                    mt: 1.5, 
+                                    px: 2, 
+                                    py: 0.75, 
+                                    borderRadius: 2, 
+                                    background: 'linear-gradient(135deg, rgba(26, 173, 25, 0.08) 0%, rgba(43, 162, 69, 0.12) 100%)',
+                                    color: 'primary.main', 
+                                    fontWeight: 600, 
                                     fontSize: '0.8125rem',
                                     border: '1px solid',
-                                    borderColor: 'rgba(16, 174, 255, 0.2)',
+                                    borderColor: 'rgba(26, 173, 25, 0.25)',
+                                    boxShadow: '0 2px 4px rgba(26, 173, 25, 0.1)',
                                 }}>
+                                    <LocationOnIcon sx={{ fontSize: 16 }} />
                                     当前显示时区：{getTimezoneLabel(viewTimezone)}
                                 </Box>
                             )}
                         </Typography>
 
-                        <TimeGrid
-                            event={event}
-                            selectedSlots={selectedSlots}
-                            onSlotsChange={setSelectedSlots}
-                            viewTimezone={viewTimezone}
-                        />
+                        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                            <TimeGrid
+                                event={event}
+                                selectedSlots={selectedSlots}
+                                onSlotsChange={setSelectedSlots}
+                                viewTimezone={viewTimezone}
+                            />
+                        </Box>
                     </Box>
 
                     {/* Selected Slots Summary */}

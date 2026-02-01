@@ -17,8 +17,17 @@ import {
     Select,
     MenuItem,
     InputLabel,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    IconButton,
+    Divider,
 } from '@mui/material';
 import PublicIcon from '@mui/icons-material/Public';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import CloseIcon from '@mui/icons-material/Close';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
 import { addDays } from 'date-fns';
 import TimeGrid from './TimeGrid';
 import { useTranslation } from "@/hooks/useTranslation";
@@ -35,7 +44,9 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
     const [tabValue, setTabValue] = useState(0);
     const [resultsData, setResultsData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
-    const [viewTimezone, setViewTimezone] = useState<string>(event.timezone);
+    const [viewTimezone, setViewTimezone] = useState<string>('Asia/Shanghai');
+    const [selectedSlot, setSelectedSlot] = useState<number | null>(null);
+    const [slotDetailsOpen, setSlotDetailsOpen] = useState(false);
 
     useEffect(() => {
         fetchResults();
@@ -51,6 +62,28 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
         } finally {
             setLoading(false);
         }
+    };
+
+    // Get available and unavailable users for a specific slot
+    const getSlotUserDetails = (slotIndex: number) => {
+        const available: Response[] = [];
+        const unavailable: Response[] = [];
+        
+        responses.forEach(response => {
+            if (response.availabilitySlots.includes(slotIndex)) {
+                available.push(response);
+            } else {
+                unavailable.push(response);
+            }
+        });
+        
+        return { available, unavailable };
+    };
+
+    // Handle slot click
+    const handleSlotClick = (slotIndex: number) => {
+        setSelectedSlot(slotIndex);
+        setSlotDetailsOpen(true);
     };
 
     // Convert slot index to readable time range
@@ -146,24 +179,35 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
     return (
         <Box>
             {/* Timezone Selector */}
-            <Paper elevation={1} sx={{ p: 2.5, mb: 3, border: '1px solid', borderColor: 'divider' }}>
+            <Paper
+                elevation={0}
+                sx={{ 
+                    mb: 3, 
+                    p: 2.5, 
+                    borderRadius: 2.5,
+                    border: '1px solid',
+                    borderColor: 'rgba(26, 173, 25, 0.2)',
+                    background: 'linear-gradient(135deg, rgba(26, 173, 25, 0.03) 0%, rgba(43, 162, 69, 0.05) 100%)',
+                }}
+            >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2.5 }}>
                     <Box
                         sx={{
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            width: 32,
-                            height: 32,
+                            width: 36,
+                            height: 36,
                             borderRadius: '50%',
-                            bgcolor: 'primary.main',
+                            background: 'linear-gradient(135deg, #1AAD19 0%, #2BA245 100%)',
                             color: 'white',
+                            boxShadow: '0 2px 8px rgba(26, 173, 25, 0.25)',
                         }}
                     >
-                        <PublicIcon sx={{ fontSize: 18 }} />
+                        <PublicIcon sx={{ fontSize: 20 }} />
                     </Box>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                        查看时区
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                        时区设置
                     </Typography>
                 </Box>
                 <Box sx={{ mb: 1 }}>
@@ -186,7 +230,21 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
                     </FormControl>
                 </Box>
                 {viewTimezone !== event.timezone && (
-                    <Alert severity="info" sx={{ mt: 1.5, fontSize: '0.875rem' }}>
+                    <Alert 
+                        severity="success" 
+                        icon={<LocationOnIcon fontSize="small" />}
+                        sx={{ 
+                            mt: 1.5, 
+                            fontSize: '0.875rem',
+                            bgcolor: 'rgba(26, 173, 25, 0.08)',
+                            color: 'primary.main',
+                            borderRadius: 2,
+                            border: '1px solid rgba(26, 173, 25, 0.2)',
+                            '& .MuiAlert-icon': {
+                                color: 'primary.main',
+                            },
+                        }}
+                    >
                         你正在以 <strong>{getTimezoneLabel(viewTimezone)}</strong> 查看结果。所有时间已从活动时区转换。
                     </Alert>
                 )}
@@ -215,6 +273,7 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
                         heatmapData={slotCounts}
                         maxCount={maxCount}
                         viewTimezone={viewTimezone}
+                        onSlotClick={handleSlotClick}
                     />
                     <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
                         <Typography variant="body2" color="text.secondary">0 {t('resultsPage.people')}</Typography>
@@ -348,6 +407,113 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
                     ))}
                 </List>
             </Paper>
-        </Box>
+            {/* Slot Details Dialog */}
+            <Dialog 
+                open={slotDetailsOpen} 
+                onClose={() => setSlotDetailsOpen(false)}
+                maxWidth="sm"
+                fullWidth
+            >
+                <DialogTitle sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center',
+                    pb: 1,
+                    fontWeight: 600,
+                }}>
+                    {selectedSlot !== null ? getSlotTimeRange(selectedSlot) : ''}
+                    <IconButton 
+                        onClick={() => setSlotDetailsOpen(false)}
+                        size="small"
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
+                <DialogContent>
+                    {selectedSlot !== null && (() => {
+                        const { available, unavailable } = getSlotUserDetails(selectedSlot);
+                        return (
+                            <Box>
+                                {/* Available Users */}
+                                <Box sx={{ mb: 3 }}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                                        <CheckCircleIcon sx={{ color: 'success.main', fontSize: 20 }} />
+                                        <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'success.main' }}>
+                                            可用 ({available.length})
+                                        </Typography>
+                                    </Box>
+                                    {available.length === 0 ? (
+                                        <Typography variant="body2" color="text.secondary" sx={{ ml: 3.5 }}>
+                                            暂无可用用户
+                                        </Typography>
+                                    ) : (
+                                        <List dense>
+                                            {available.map((user) => (
+                                                <ListItem 
+                                                    key={user.id}
+                                                    sx={{
+                                                        borderRadius: 1,
+                                                        mb: 0.5,
+                                                        bgcolor: 'rgba(26, 173, 25, 0.08)',
+                                                        border: '1px solid rgba(26, 173, 25, 0.2)',
+                                                    }}
+                                                >
+                                                    <ListItemText 
+                                                        primary={user.name || '匿名用户'}
+                                                        primaryTypographyProps={{
+                                                            fontWeight: 500,
+                                                            fontSize: '0.9375rem',
+                                                        }}
+                                                    />
+                                                </ListItem>
+                                            ))}
+                                        </List>
+                                    )}
+                                </Box>
+
+                                <Divider sx={{ my: 2 }} />
+
+                                {/* Unavailable Users */}
+                                <Box>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                                        <CancelIcon sx={{ color: 'error.main', fontSize: 20 }} />
+                                        <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'error.main' }}>
+                                            不可用 ({unavailable.length})
+                                        </Typography>
+                                    </Box>
+                                    {unavailable.length === 0 ? (
+                                        <Typography variant="body2" color="text.secondary" sx={{ ml: 3.5 }}>
+                                            所有用户均可用
+                                        </Typography>
+                                    ) : (
+                                        <List dense>
+                                            {unavailable.map((user) => (
+                                                <ListItem 
+                                                    key={user.id}
+                                                    sx={{
+                                                        borderRadius: 1,
+                                                        mb: 0.5,
+                                                        bgcolor: 'rgba(244, 67, 54, 0.08)',
+                                                        border: '1px solid rgba(244, 67, 54, 0.2)',
+                                                    }}
+                                                >
+                                                    <ListItemText 
+                                                        primary={user.name || '匿名用户'}
+                                                        primaryTypographyProps={{
+                                                            fontWeight: 500,
+                                                            fontSize: '0.9375rem',
+                                                            color: 'text.secondary',
+                                                        }}
+                                                    />
+                                                </ListItem>
+                                            ))}
+                                        </List>
+                                    )}
+                                </Box>
+                            </Box>
+                        );
+                    })()}
+                </DialogContent>
+            </Dialog>        </Box>
     );
 }

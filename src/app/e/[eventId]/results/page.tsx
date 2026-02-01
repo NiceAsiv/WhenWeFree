@@ -94,16 +94,17 @@ export default function ResultsPage({ params }: ResultsPageProps) {
 
             <Box sx={{ mb: 4 }}>
                 <Typography
-                    variant="h3"
+                    variant="h2"
                     component="h1"
-                    gutterBottom
                     sx={{
                         fontWeight: 700,
-                        fontSize: { xs: '2rem', sm: '2.5rem' },
+                        fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' },
+                        mb: 2,
                         background: 'linear-gradient(135deg, #1AAD19 0%, #2BA245 100%)',
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
                         backgroundClip: 'text',
+                        lineHeight: 1.3,
                     }}
                 >
                     {t('resultsPage.title', { title: event.title })}
@@ -111,12 +112,6 @@ export default function ResultsPage({ params }: ResultsPageProps) {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                     <Typography variant="body1" color="text.secondary">
                         {t('resultsPage.responsesCount', { count: event.responses.length })}
-                    </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 1 }}>
-                    <PublicIcon sx={{ fontSize: 18, color: 'primary.main' }} />
-                    <Typography variant="body2" color="primary.main" sx={{ fontWeight: 500 }}>
-                        {getTimezoneLabel(event.timezone)}
                     </Typography>
                 </Box>
             </Box>

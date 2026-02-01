@@ -8,6 +8,10 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  // 添加连接池配置以解决连接重置问题
+  // connection_limit: 最大连接数
+  // pool_timeout: 获取连接的超时时间（秒）
+  // connect_timeout: 建立连接的超时时间（秒）
 }
 
 model Event {
