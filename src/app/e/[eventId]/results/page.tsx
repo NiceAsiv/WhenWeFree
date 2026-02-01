@@ -66,6 +66,7 @@ export default function ResultsPage({ params }: ResultsPageProps) {
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Link href={`/e/${eventId}`} passHref style={{ textDecoration: 'none' }}>
                     <IconButton
+                        title={t('backToEvent')}
                         sx={{
                             color: 'text.secondary',
                             '&:hover': {

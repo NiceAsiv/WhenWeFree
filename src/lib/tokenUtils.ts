@@ -1,7 +1,12 @@
 import { nanoid } from "nanoid";
 
-/**
- * Generate a secure admin token for event management
+/** * Generate a short event ID (8 characters)
+ */
+export function generateEventId(): string {
+    return nanoid(8);
+}
+
+/** * Generate a secure admin token for event management
  */
 export function generateAdminToken(): string {
     return `admin_${nanoid(32)}`;

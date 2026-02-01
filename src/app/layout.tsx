@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import ThemeRegistry from "@/components/ThemeRegistry";
 import { AppProvider } from "@/contexts/AppContext";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
     title: "When We Free - 一起有空 | 找到共同空闲时间",
@@ -21,7 +18,7 @@ export default function RootLayout({
 }) {
     return (
         <html lang="zh-CN">
-            <body className={inter.className}>
+            <body>
                 <AppProvider>
                     <ThemeRegistry>{children}</ThemeRegistry>
                 </AppProvider>

@@ -90,23 +90,43 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
     const getSlotTimeRange = (slotIndex: number): string => {
         try {
             // Helper function to parse time string (HH:mm) to minutes
-            const parseTimeToMinutes = (timeStr: string | null): number => {
+            const parseTimeToMinutes = (timeStr: string | null | undefined): number => {
                 if (!timeStr) return 540; // Default 9:00 AM
                 const [hours, minutes] = timeStr.split(':').map(Number);
+                if (isNaN(hours) || isNaN(minutes)) return 540;
                 return hours * 60 + minutes;
             };
 
             // Parse dates - handle both string and Date objects
-            const startDate = typeof event.startDate === 'string'
-                ? new Date(event.startDate)
-                : event.startDate;
-            const endDate = typeof event.endDate === 'string'
-                ? new Date(event.endDate)
-                : event.endDate;
+            let startDate: Date;
+            let endDate: Date;
+            
+            if (typeof event.startDate === 'string') {
+                startDate = new Date(event.startDate);
+            } else if (event.startDate instanceof Date) {
+                startDate = event.startDate;
+            } else {
+                console.error('Invalid startDate type:', event.startDate);
+                return `时间段 ${slotIndex + 1}`;
+            }
+
+            if (typeof event.endDate === 'string') {
+                endDate = new Date(event.endDate);
+            } else if (event.endDate instanceof Date) {
+                endDate = event.endDate;
+            } else {
+                console.error('Invalid endDate type:', event.endDate);
+                return `时间段 ${slotIndex + 1}`;
+            }
 
             // Validate dates
             if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-                console.error('Invalid date:', { startDate: event.startDate, endDate: event.endDate });
+                console.error('Invalid date:', { 
+                    startDate: event.startDate, 
+                    endDate: event.endDate,
+                    parsedStartDate: startDate,
+                    parsedEndDate: endDate
+                });
                 return `时间段 ${slotIndex + 1}`;
             }
 
@@ -123,6 +143,11 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
             const totalMinutesPerDay = (endHour * 60 + endMinute) - (startHour * 60 + startMinute);
             const slotsPerDay = Math.ceil(totalMinutesPerDay / slotMinutes);
 
+            if (slotsPerDay <= 0) {
+                console.error('Invalid slotsPerDay:', { dayStartTime, dayEndTime, slotMinutes, slotsPerDay });
+                return `时间段 ${slotIndex + 1}`;
+            }
+
             // Calculate which day and which slot within that day
             const dayIndex = Math.floor(slotIndex / slotsPerDay);
             const slotInDay = slotIndex % slotsPerDay;
@@ -132,7 +157,12 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
 
             // Validate the calculated date
             if (isNaN(slotDate.getTime())) {
-                console.error('Invalid slot date:', { slotIndex, dayIndex, startDate });
+                console.error('Invalid slot date:', { 
+                    slotIndex, 
+                    dayIndex, 
+                    startDate: startDate.toISOString(),
+                    slotDate
+                });
                 return `时间段 ${slotIndex + 1}`;
             }
 

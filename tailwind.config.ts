@@ -9,6 +9,9 @@ const config: Config = {
     darkMode: 'class',
     theme: {
         extend: {
+            fontFamily: {
+                sans: ['HarmonyOS Sans', 'system-ui', '-apple-system', 'sans-serif'],
+            },
             colors: {
                 primary: {
                     50: '#f0f9ff',
