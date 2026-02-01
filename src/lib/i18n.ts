@@ -11,6 +11,7 @@ export const translations = {
         copy: '复制',
         copied: '已复制',
         back: '返回',
+        home: '首页',
 
         // Home Page
         homePage: {
@@ -173,7 +174,7 @@ export const translations = {
             selectTimeHint: '点击或拖拽选择时间段，绿色表示已选中',
             selectedSlots: '已选择 {count} 个时间段',
             loadingData: '正在加载已有数据...',
-            foundPrevious: '✓ 已找到你之前的选择，修改后重新提交即可',
+            foundPrevious: '已找到你之前的选择，修改后重新提交即可',
             autoSave: '输入邮箱后自动保存，下次可以继续修改',
             submitTime: '提交我的空闲时间',
             updateTime: '更新我的空闲时间',
@@ -182,6 +183,19 @@ export const translations = {
             updated: '已更新 "{name}" 的空闲时间！',
             viewAllResults: '→ 点击查看所有人的结果',
             nameMinLength: '请输入至少2个字符的昵称',
+            timezoneSettings: '时区设置',
+            selectTimezone: '选择你查看时间的时区',
+            currentTimezone: '当前显示时区',
+            timezoneNotice: '你正在以 <strong>{timezone}</strong> 查看时间。你选择的时间会自动转换为活动时区保存。',
+            fullDay: '全天',
+            morning: '上午 9-12',
+            afternoon: '下午 12-18',
+            evening: '晚上 18-22',
+            errorSelectSlots: '请至少选择一个时间段',
+            errorNameMinLength: '请输入至少2个字符的昵称',
+            errorInvalidEmail: '请输入有效的邮箱地址',
+            errorSubmitFailed: '提交失败',
+            errorSubmitRetry: '提交失败，请重试',
         },
 
         // Share Dialog
@@ -253,6 +267,28 @@ export const translations = {
             deleteSuccess: '活动已删除',
             createdAt: '创建于',
         },
+
+        // Not Found
+        notFound: {
+            title: '页面不存在',
+            description: '抱歉，您访问的页面不存在或已被删除。',
+            hint: '请检查网址是否正确，或返回首页。',
+            backToHome: '返回首页',
+        },
+
+        // Errors
+        errors: {
+            loadEventsFailed: '加载活动失败，请刷新页面重试',
+            deleteEventFailed: '删除活动失败，请重试',
+            googleLoginFailed: 'Google 登录失败，请重试',
+            googleLoginNetwork: 'Google 登录失败，请检查网络连接',
+            googleLoginNotAvailable: 'Google 登录功能暂未开放',
+            googleLoginNotLoaded: 'Google 登录服务未加载，请刷新页面重试',
+            googleLoginInitFailed: 'Google 登录初始化失败，请刷新页面重试',
+            loginFailed: '登录失败，请重试',
+            loginNetwork: '登录失败，请检查网络连接',
+            registerFailed: '注册失败，请重试',
+        },
     },
     en: {
         // Common
@@ -266,6 +302,7 @@ export const translations = {
         copy: 'Copy',
         copied: 'Copied',
         back: 'Back',
+        home: 'Home',
 
         // Home Page
         homePage: {
@@ -437,6 +474,19 @@ export const translations = {
             updated: 'Updated "{name}"\'s availability!',
             viewAllResults: '→ Click to view all results',
             nameMinLength: 'Please enter at least 2 characters',
+            timezoneSettings: 'Timezone Settings',
+            selectTimezone: 'Select your viewing timezone',
+            currentTimezone: 'Current timezone',
+            timezoneNotice: 'You are viewing in <strong>{timezone}</strong>. Your selections will be converted to the event timezone.',
+            fullDay: 'Full Day',
+            morning: 'Morning 9-12',
+            afternoon: 'Afternoon 12-18',
+            evening: 'Evening 18-22',
+            errorSelectSlots: 'Please select at least one time slot',
+            errorNameMinLength: 'Please enter at least 2 characters for name',
+            errorInvalidEmail: 'Please enter a valid email address',
+            errorSubmitFailed: 'Submission failed',
+            errorSubmitRetry: 'Submission failed, please try again',
         },
 
         // Share Dialog
@@ -507,6 +557,28 @@ export const translations = {
             deleteConfirm: 'Are you sure you want to delete this event?',
             deleteSuccess: 'Event deleted',
             createdAt: 'Created at',
+        },
+
+        // Not Found
+        notFound: {
+            title: 'Page Not Found',
+            description: 'Sorry, the page you visited does not exist or has been removed.',
+            hint: 'Please check the URL or return to the homepage.',
+            backToHome: 'Back to Home',
+        },
+
+        // Errors
+        errors: {
+            loadEventsFailed: 'Failed to load events, please refresh the page',
+            deleteEventFailed: 'Failed to delete event, please try again',
+            googleLoginFailed: 'Google login failed, please try again',
+            googleLoginNetwork: 'Google login failed, please check your network connection',
+            googleLoginNotAvailable: 'Google login is not available yet',
+            googleLoginNotLoaded: 'Google login service not loaded, please refresh the page',
+            googleLoginInitFailed: 'Failed to initialize Google login, please refresh the page',
+            loginFailed: 'Login failed, please try again',
+            loginNetwork: 'Login failed, please check your network connection',
+            registerFailed: 'Registration failed, please try again',
         },
     },
 };

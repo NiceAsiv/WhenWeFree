@@ -61,7 +61,7 @@ export default function ResultsPage({ params }: ResultsPageProps) {
     }
 
     return (
-        <Container maxWidth="xl" sx={{ py: 8 }}>
+        <Container maxWidth="lg" sx={{ py: 8 }}>
             {/* Top Bar with Back, Settings and Share */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Link href={`/e/${eventId}`} passHref style={{ textDecoration: 'none' }}>

@@ -102,7 +102,7 @@ export default function DashboardPage() {
             setEvents(data.events || []);
         } catch (error) {
             console.error('Failed to load events:', error);
-            setError('加载活动失败，请刷新页面重试');
+            setError(t('errors.loadEventsFailed'));
         } finally {
             setLoading(false);
         }
@@ -134,7 +134,7 @@ export default function DashboardPage() {
             setEventToDelete(null);
         } catch (error) {
             console.error('Failed to delete event:', error);
-            setError('删除活动失败，请重试');
+            setError(t('errors.deleteEventFailed'));
         }
     };
 
@@ -156,20 +156,24 @@ export default function DashboardPage() {
         <Box sx={{
             background: (theme) => theme.palette.mode === 'dark'
                 ? 'linear-gradient(180deg, #000000 0%, #121212 100%)'
-                : 'linear-gradient(180deg, #F1F1F1 0%, #FFFFFF 100%)',
+                : 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
             minHeight: '100vh',
-            py: 4,
+            py: { xs: 3, sm: 5 },
         }}>
             <Container maxWidth="lg">
                 {/* Header */}
-                <Box sx={{ mb: 4 }}>
+                <Box sx={{ mb: 5 }}>
                     <Link href="/" passHref style={{ textDecoration: 'none' }}>
                         <Button
                             startIcon={<ArrowBackIcon />}
                             sx={{
                                 color: (theme) => theme.palette.text.secondary,
                                 textTransform: 'none',
-                                mb: 2,
+                                mb: 3,
+                                '&:hover': {
+                                    backgroundColor: 'rgba(26, 173, 25, 0.08)',
+                                    color: 'primary.main',
+                                }
                             }}
                         >
                             {t('back')}
@@ -179,48 +183,75 @@ export default function DashboardPage() {
                     <Box sx={{ 
                         display: 'flex', 
                         justifyContent: 'space-between', 
-                        alignItems: 'center',
-                        flexWrap: 'wrap',
-                        gap: 2,
+                        alignItems: { xs: 'flex-start', sm: 'center' },
+                        flexDirection: { xs: 'column', sm: 'row' },
+                        gap: 3,
+                        mb: 2,
                     }}>
                         <Box>
                             <Typography
                                 variant="h3"
                                 component="h1"
-                                gutterBottom
                                 sx={{
-                                    fontWeight: 700,
-                                    color: (theme) => theme.palette.mode === 'dark' ? '#4CAF50' : '#2BA245',
+                                    fontWeight: 800,
+                                    fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
+                                    background: 'linear-gradient(135deg, #1AAD19 0%, #2BA245 100%)',
+                                    WebkitBackgroundClip: 'text',
+                                    WebkitTextFillColor: 'transparent',
+                                    backgroundClip: 'text',
+                                    mb: 1,
                                 }}
                             >
                                 {t('dashboard.title')}
                             </Typography>
-                            <Typography variant="body1" color="text.secondary">
-                                {t('dashboard.myEvents')}
-                            </Typography>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                <EventIcon sx={{ color: 'primary.main', fontSize: 20 }} />
+                                <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.primary', opacity: 0.75 }}>
+                                    {loading ? t('loading') : t('dashboard.eventCount', { count: events.length })}
+                                </Typography>
+                            </Box>
                         </Box>
-                        <Link href="/new" passHref style={{ textDecoration: 'none' }}>
-                            <Button
-                                variant="contained"
-                                size="large"
-                                startIcon={<AddIcon />}
-                                sx={{
-                                    px: 4,
-                                    py: 1.5,
-                                    borderRadius: 2,
-                                    textTransform: 'none',
-                                    fontSize: '1rem',
-                                }}
-                            >
-                                {t('homePage.createEvent')}
-                            </Button>
-                        </Link>
+                        <Box sx={{ width: { xs: '100%', sm: 'auto' } }}>
+                            <Link href="/new" passHref style={{ textDecoration: 'none' }}>
+                                <Button
+                                    variant="contained"
+                                    size="large"
+                                    startIcon={<AddIcon />}
+                                    sx={{
+                                        px: 4,
+                                        py: 1.5,
+                                        borderRadius: 3,
+                                        textTransform: 'none',
+                                        fontSize: '1rem',
+                                        fontWeight: 600,
+                                        width: '100%',
+                                        boxShadow: '0 4px 14px rgba(26, 173, 25, 0.3)',
+                                        background: 'linear-gradient(135deg, #1AAD19 0%, #2BA245 100%)',
+                                        transition: 'all 0.3s ease',
+                                        '&:hover': {
+                                            transform: 'translateY(-2px)',
+                                            boxShadow: '0 6px 20px rgba(26, 173, 25, 0.4)',
+                                        },
+                                    }}
+                                >
+                                    {t('homePage.createEvent')}
+                                </Button>
+                            </Link>
+                        </Box>
                     </Box>
                 </Box>
 
                 {/* Error Alert */}
                 {error && (
-                    <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
+                    <Alert 
+                        severity="error" 
+                        sx={{ 
+                            mb: 3,
+                            borderRadius: 2,
+                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                        }} 
+                        onClose={() => setError(null)}
+                    >
                         {error}
                     </Alert>
                 )}
@@ -293,25 +324,72 @@ export default function DashboardPage() {
                     <Card
                         elevation={0}
                         sx={{
-                            p: 6,
+                            p: { xs: 4, sm: 8 },
                             textAlign: 'center',
                             backgroundColor: (theme) => theme.palette.background.paper,
-                            border: (theme) => theme.palette.mode === 'dark' ? '1px solid #333' : '1px solid #e0e0e0',
-                            borderRadius: 3,
+                            border: 'none',
+                            borderRadius: 4,
+                            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+                            background: (theme) => theme.palette.mode === 'dark' 
+                                ? 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)'
+                                : 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
                         }}
                     >
-                        <EventIcon sx={{ fontSize: 80, color: 'text.secondary', mb: 2 }} />
-                        <Typography variant="h5" gutterBottom color="text.secondary">
+                        <Box sx={{
+                            width: 120,
+                            height: 120,
+                            borderRadius: '50%',
+                            background: 'linear-gradient(135deg, rgba(26, 173, 25, 0.1) 0%, rgba(43, 162, 69, 0.15) 100%)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            margin: '0 auto',
+                            mb: 3,
+                        }}>
+                            <EventIcon sx={{ fontSize: 60, color: 'primary.main' }} />
+                        </Box>
+                        <Typography 
+                            variant="h5" 
+                            gutterBottom 
+                            sx={{ 
+                                fontWeight: 700,
+                                color: 'text.primary',
+                                mb: 1.5,
+                            }}
+                        >
                             {t('dashboard.noEvents')}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                        <Typography 
+                            variant="body1" 
+                            sx={{ 
+                                mb: 4,
+                                maxWidth: 400,
+                                mx: 'auto',
+                                lineHeight: 1.7,
+                                color: 'text.primary',
+                                opacity: 0.7,
+                                fontSize: '1.05rem',
+                            }}
+                        >
                             {t('dashboard.createFirst')}
                         </Typography>
                         <Link href="/new" passHref style={{ textDecoration: 'none' }}>
                             <Button
                                 variant="contained"
                                 startIcon={<AddIcon />}
-                                sx={{ textTransform: 'none' }}
+                                size="large"
+                                sx={{ 
+                                    textTransform: 'none',
+                                    px: 4,
+                                    py: 1.5,
+                                    borderRadius: 3,
+                                    fontWeight: 600,
+                                    boxShadow: '0 4px 14px rgba(26, 173, 25, 0.3)',
+                                    '&:hover': {
+                                        transform: 'translateY(-2px)',
+                                        boxShadow: '0 6px 20px rgba(26, 173, 25, 0.4)',
+                                    },
+                                }}
                             >
                                 {t('homePage.createEvent')}
                             </Button>
@@ -326,26 +404,44 @@ export default function DashboardPage() {
                         gridTemplateColumns: {
                             xs: '1fr',
                             sm: 'repeat(2, 1fr)',
-                            md: 'repeat(3, 1fr)',
+                            lg: 'repeat(3, 1fr)',
                         },
-                        gap: 3,
+                        gap: { xs: 2.5, sm: 3 },
                     }}>
                         {events.map((event) => (
                             <Box key={event.id}>
                                 <Card
-                                    elevation={2}
+                                    elevation={0}
                                     sx={{
                                         height: '100%',
                                         display: 'flex',
                                         flexDirection: 'column',
                                         borderRadius: 3,
-                                        transition: 'all 0.3s ease',
-                                        border: (theme) => theme.palette.mode === 'dark' ? '1px solid #333' : 'none',
+                                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                        border: 'none',
+                                        boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
+                                        background: (theme) => theme.palette.mode === 'dark' 
+                                            ? 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)'
+                                            : 'linear-gradient(135deg, #ffffff 0%, #fafafa 100%)',
+                                        overflow: 'hidden',
+                                        position: 'relative',
+                                        '&::before': {
+                                            content: '""',
+                                            position: 'absolute',
+                                            top: 0,
+                                            left: 0,
+                                            right: 0,
+                                            height: 4,
+                                            background: 'linear-gradient(90deg, #1AAD19 0%, #2BA245 100%)',
+                                            opacity: 0,
+                                            transition: 'opacity 0.3s ease',
+                                        },
                                         '&:hover': {
-                                            transform: 'translateY(-4px)',
-                                            boxShadow: (theme) => theme.palette.mode === 'dark' 
-                                                ? '0px 8px 24px rgba(0, 0, 0, 0.5)' 
-                                                : '0px 8px 24px rgba(0, 0, 0, 0.15)',
+                                            transform: 'translateY(-8px)',
+                                            boxShadow: '0 12px 28px rgba(26, 173, 25, 0.15)',
+                                            '&::before': {
+                                                opacity: 1,
+                                            },
                                         },
                                     }}
                                 >
@@ -353,15 +449,17 @@ export default function DashboardPage() {
                                         <Typography
                                             variant="h6"
                                             component="h2"
-                                            gutterBottom
                                             sx={{
-                                                fontWeight: 600,
+                                                fontWeight: 700,
+                                                fontSize: '1.15rem',
                                                 overflow: 'hidden',
                                                 textOverflow: 'ellipsis',
                                                 display: '-webkit-box',
                                                 WebkitLineClamp: 2,
                                                 WebkitBoxOrient: 'vertical',
-                                                minHeight: '3.6em',
+                                                minHeight: '3em',
+                                                mb: 2,
+                                                lineHeight: 1.5,
                                             }}
                                         >
                                             {event.title}
@@ -370,63 +468,108 @@ export default function DashboardPage() {
                                         {event.description && (
                                             <Typography
                                                 variant="body2"
-                                                color="text.secondary"
                                                 sx={{
-                                                    mb: 2,
+                                                    mb: 3,
                                                     overflow: 'hidden',
                                                     textOverflow: 'ellipsis',
                                                     display: '-webkit-box',
                                                     WebkitLineClamp: 2,
                                                     WebkitBoxOrient: 'vertical',
+                                                    lineHeight: 1.6,
+                                                    color: 'text.primary',
+                                                    opacity: 0.75,
+                                                    fontSize: '0.9375rem',
                                                 }}
                                             >
                                                 {event.description}
                                             </Typography>
                                         )}
 
-                                        <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-                                            <Chip
-                                                icon={<GroupIcon />}
-                                                label={t('dashboard.responses', { count: event.responseCount })}
-                                                size="small"
-                                                variant="outlined"
-                                            />
+                                        <Box sx={{ 
+                                            display: 'flex', 
+                                            alignItems: 'center',
+                                            gap: 1, 
+                                            mb: 2.5,
+                                        }}>
+                                            <Box sx={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 1,
+                                                px: 1.5,
+                                                py: 0.75,
+                                                borderRadius: 2,
+                                                backgroundColor: 'rgba(26, 173, 25, 0.08)',
+                                            }}>
+                                                <GroupIcon sx={{ fontSize: 18, color: 'primary.main' }} />
+                                                <Typography 
+                                                    variant="body2" 
+                                                    sx={{ 
+                                                        fontWeight: 600,
+                                                        color: 'primary.main',
+                                                    }}
+                                                >
+                                                    {t('dashboard.responses', { count: event.responseCount })}
+                                                </Typography>
+                                            </Box>
                                         </Box>
 
-                                        <Typography variant="caption" color="text.secondary">
-                                            {t('dashboard.createdAt')} {formatDate(event.createdAt)}
-                                        </Typography>
+                                        <Box sx={{ 
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 0.75,
+                                        }}>
+                                            <EventIcon sx={{ fontSize: 14, color: 'text.primary', opacity: 0.5 }} />
+                                            <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.primary', opacity: 0.65, fontSize: '0.8125rem' }}>
+                                                {formatDate(event.createdAt)}
+                                            </Typography>
+                                        </Box>
                                     </CardContent>
 
                                     <Box
                                         sx={{
-                                            p: 2,
+                                            p: 2.5,
                                             pt: 0,
                                             display: 'flex',
-                                            justifyContent: 'space-between',
-                                            gap: 1,
+                                            gap: 1.5,
                                         }}
                                     >
                                         <Button
-                                            variant="outlined"
-                                            size="small"
+                                            variant="contained"
+                                            size="medium"
                                             startIcon={<VisibilityIcon />}
                                             onClick={() => router.push(`/e/${event.id}/results`)}
-                                            sx={{ flex: 1, textTransform: 'none' }}
+                                            sx={{ 
+                                                flex: 1, 
+                                                textTransform: 'none',
+                                                fontWeight: 600,
+                                                borderRadius: 2,
+                                                py: 1,
+                                                boxShadow: 'none',
+                                                '&:hover': {
+                                                    boxShadow: '0 4px 12px rgba(26, 173, 25, 0.25)',
+                                                },
+                                            }}
                                         >
                                             {t('dashboard.viewResults')}
                                         </Button>
                                         <IconButton
                                             color="error"
-                                            size="small"
                                             onClick={() => handleDeleteClick(event)}
                                             sx={{
-                                                border: '1px solid',
+                                                border: '1.5px solid',
                                                 borderColor: 'error.main',
-                                                borderRadius: 1,
+                                                borderRadius: 2,
+                                                width: 44,
+                                                height: 44,
+                                                transition: 'all 0.2s ease',
+                                                '&:hover': {
+                                                    backgroundColor: 'error.main',
+                                                    color: 'white',
+                                                    transform: 'scale(1.05)',
+                                                },
                                             }}
                                         >
-                                            <DeleteIcon />
+                                            <DeleteIcon fontSize="small" />
                                         </IconButton>
                                     </Box>
                                 </Card>

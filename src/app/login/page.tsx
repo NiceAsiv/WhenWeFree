@@ -81,7 +81,7 @@ export default function LoginPage() {
             const data = await res.json();
 
             if (!res.ok) {
-                setError(data.error || 'Google 登录失败，请重试');
+                setError(data.error || t('errors.googleLoginFailed'));
                 return;
             }
 
@@ -94,7 +94,7 @@ export default function LoginPage() {
             }, 100);
         } catch (err) {
             console.error('Google sign-in error:', err);
-            setError('Google 登录失败，请检查网络连接');
+            setError(t('errors.googleLoginNetwork'));
         } finally {
             setLoading(false);
         }
@@ -107,7 +107,7 @@ export default function LoginPage() {
             return;
         }
         if (!window.google) {
-            setError('Google 登录服务未加载，请刷新页面重试');
+            setError(t('errors.googleLoginNotLoaded'));
             return;
         }
         try {
@@ -149,7 +149,7 @@ export default function LoginPage() {
             const data = await response.json();
 
             if (!response.ok) {
-                setError(data.error || '登录失败，请重试');
+                setError(data.error || t('errors.loginFailed'));
                 return;
             }
 
@@ -162,7 +162,7 @@ export default function LoginPage() {
             }, 100);
         } catch (err) {
             console.error('Login error:', err);
-            setError('登录失败，请检查网络连接');
+            setError(t('errors.loginNetwork'));
         } finally {
             setLoading(false);
         }
@@ -202,7 +202,7 @@ export default function LoginPage() {
             const data = await response.json();
 
             if (!response.ok) {
-                setError(data.error || '注册失败，请重试');
+                setError(data.error || t('errors.registerFailed'));
                 return;
             }
 

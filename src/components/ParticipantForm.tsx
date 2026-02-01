@@ -7,17 +7,20 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import PublicIcon from '@mui/icons-material/Public';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import HomeIcon from '@mui/icons-material/Home';
 import TimeGrid from './TimeGrid';
 import { Event } from '@/types';
 import { format, addDays } from 'date-fns';
 import { storeEmailLocally, getStoredEmail } from '@/lib/crypto';
 import { getTimezoneLabel, getUserTimezone, TIMEZONES } from '@/lib/timezones';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface ParticipantFormProps {
     event: Event;
 }
 
 export default function ParticipantForm({ event }: ParticipantFormProps) {
+    const { t, language } = useTranslation();
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [selectedSlots, setSelectedSlots] = useState<number[]>([]);
@@ -118,10 +121,10 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
 
         if (event.mode === 'fullDay') {
             slotsPerDay = 1;
-            getSlotLabel = () => '全天';
+            getSlotLabel = () => t('participantForm.fullDay');
         } else if (event.timeMode === 'period') {
             slotsPerDay = 3;
-            const labels = ['上午 9-12', '下午 12-18', '晚上 18-22'];
+            const labels = [t('participantForm.morning'), t('participantForm.afternoon'), t('participantForm.evening')];
             getSlotLabel = (slotInDay) => labels[slotInDay] || '';
         } else if (event.timeMode === 'custom' && event.customTimeSlots) {
             slotsPerDay = event.customTimeSlots.length;
@@ -150,12 +153,14 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
 
         // Group slots by day
         const slotsByDay: { [key: string]: string[] } = {};
+        const dateFormat = language === 'zh' ? 'M月d日 (EEE)' : 'MMM d (EEE)';
+        
         selectedSlots.forEach(slotIndex => {
             const dayIndex = Math.floor(slotIndex / slotsPerDay);
             const slotInDay = slotIndex % slotsPerDay;
             const currentDay = addDays(startDate, dayIndex);
             const dateKey = format(currentDay, 'yyyy-MM-dd');
-            const dateLabel = format(currentDay, 'M月d日 (EEE)');
+            const dateLabel = format(currentDay, dateFormat);
             const timeLabel = getSlotLabel(slotInDay);
 
             if (!slotsByDay[dateKey]) {
@@ -170,11 +175,11 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
             .map(([dateKey, times]) => {
                 const date = new Date(dateKey);
                 return {
-                    date: format(date, 'M月d日 (EEE)'),
+                    date: format(date, dateFormat),
                     times: times.sort(),
                 };
             });
-    }, [selectedSlots, event]);
+    }, [selectedSlots, event, language]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -182,17 +187,17 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
         setSuccess(false);
 
         if (selectedSlots.length === 0) {
-            setError('请至少选择一个时间段');
+            setError(t('participantForm.errorSelectSlots'));
             return;
         }
 
         if (!name || name.trim().length < 2) {
-            setError('请输入至少2个字符的昵称');
+            setError(t('participantForm.errorNameMinLength'));
             return;
         }
 
         if (!email || !isValidEmail(email)) {
-            setError('请输入有效的邮箱地址');
+            setError(t('participantForm.errorInvalidEmail'));
             return;
         }
 
@@ -213,7 +218,7 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
 
             if (!response.ok) {
                 const data = await response.json();
-                throw new Error(data.error || '提交失败');
+                throw new Error(data.error || t('participantForm.errorSubmitFailed'));
             }
 
             const data = await response.json();
@@ -224,7 +229,7 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
             // Save email to localStorage for next time (using secure storage)
             storeEmailLocally(event.id, email.trim().toLowerCase());
         } catch (err) {
-            setError(err instanceof Error ? err.message : '提交失败，请重试');
+            setError(err instanceof Error ? err.message : t('participantForm.errorSubmitRetry'));
         } finally {
             setLoading(false);
         }
@@ -277,16 +282,16 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
                                 color: 'text.primary',
                             }}
                         >
-                            时区设置
+                            {t('participantForm.timezoneSettings')}
                         </Typography>
                     </Box>
 
                     <Box sx={{ mb: 2 }}>
                         <FormControl fullWidth size="small">
-                            <InputLabel>选择你查看时间的时区</InputLabel>
+                            <InputLabel>{t('participantForm.selectTimezone')}</InputLabel>
                             <Select
                                 value={viewTimezone}
-                                label="选择你查看时间的时区"
+                                label={t('participantForm.selectTimezone')}
                                 onChange={(e) => setViewTimezone(e.target.value)}
                             >
                                 {TIMEZONES.map((tz) => (
@@ -312,7 +317,11 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
                                 },
                             }}
                         >
-                            你正在以 <strong>{getTimezoneLabel(viewTimezone)}</strong> 查看时间。你选择的时间会自动转换为活动时区保存。
+                            <span dangerouslySetInnerHTML={{ 
+                                __html: t('participantForm.timezoneNotice', { 
+                                    timezone: getTimezoneLabel(viewTimezone) 
+                                }) 
+                            }} />
                         </Alert>
                     )}
                 </Paper>
@@ -329,16 +338,16 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
                                 fontSize: { xs: '1rem', sm: '1.25rem' },
                             }}
                         >
-                            你的信息
+                            {t('participantForm.yourInfo')}
                         </Typography>
                         <Box sx={{ position: 'relative' }}>
                             <TextField
                                 fullWidth
                                 required
-                                label="昵称"
+                                label={t('participantForm.name')}
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                placeholder="输入你的昵称"
+                                placeholder={t('participantForm.namePlaceholder')}
                                 sx={{
                                     mb: 2,
                                     '& .MuiOutlinedInput-root': {
@@ -350,10 +359,10 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
                                 fullWidth
                                 required
                                 type="email"
-                                label="邮箱"
+                                label={t('participantForm.email')}
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                placeholder="输入你的邮箱"
+                                placeholder={t('participantForm.emailPlaceholder')}
                                 error={email.length > 0 && !isValidEmail(email)}
                                 sx={{
                                     mb: 1,
@@ -363,10 +372,10 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
                                 }}
                                 helperText={
                                     loadingExisting
-                                        ? "正在加载已有数据..."
+                                        ? t('participantForm.loadingData')
                                         : isUpdate
-                                            ? "已加载你的已有数据"
-                                            : "输入邮箱后自动保存，下次可以继续修改"
+                                            ? t('participantForm.foundPrevious')
+                                            : t('participantForm.autoSave')
                                 }
                                 InputProps={{
                                     endAdornment: loadingExisting && <CircularProgress size={20} />,
@@ -397,10 +406,10 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
                                 textAlign: 'center',
                             }}
                         >
-                            选择你的空闲时间
+                            {t('participantForm.selectTime')}
                         </Typography>
                         <Typography variant="body2" color="text.secondary" sx={{ mb: { xs: 2, sm: 3 }, textAlign: 'center' }}>
-                            点击或拖拽选择时间段，绿色表示已选中
+                            {t('participantForm.selectTimeHint')}
                             {viewTimezone !== event.timezone && (
                                 <Box component="span" sx={{ 
                                     display: 'inline-flex',
@@ -419,7 +428,7 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
                                     boxShadow: '0 2px 4px rgba(26, 173, 25, 0.1)',
                                 }}>
                                     <LocationOnIcon sx={{ fontSize: 16 }} />
-                                    当前显示时区：{getTimezoneLabel(viewTimezone)}
+                                    {t('participantForm.currentTimezone')}: {getTimezoneLabel(viewTimezone)}
                                 </Box>
                             )}
                         </Typography>
@@ -463,7 +472,7 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
                                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                                         <CheckCircleIcon sx={{ mr: 1.5, fontSize: { xs: 24, sm: 28 } }} />
                                         <Typography variant="h6" sx={{ fontWeight: 600, fontSize: { xs: '1rem', sm: '1.25rem' } }}>
-                                            已选择 {selectedSlots.length} 个时间段
+                                            {t('participantForm.selectedSlots', { count: selectedSlots.length })}
                                         </Typography>
                                     </Box>
 
@@ -555,18 +564,29 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
                             }}
                         >
                             <Box>
-                                <Typography variant="body1" sx={{ fontWeight: 600, mb: 1, fontSize: { xs: '0.9375rem', sm: '1rem' } }}>
-                                    {isUpdate ? `已更新 "${name}" 的空闲时间！` : `已保存 "${name}" 的空闲时间！`}
+                                <Typography variant="body1" sx={{ fontWeight: 600, mb: 1.5, fontSize: { xs: '0.9375rem', sm: '1rem' } }}>
+                                    {isUpdate ? t('participantForm.updated', { name }) : t('participantForm.saved', { name })}
                                 </Typography>
-                                <Link href={`/e/${event.id}/results`} style={{ color: 'inherit', fontWeight: 600, textDecoration: 'none' }}>
+                                <Link href={`/e/${event.id}/results`} style={{ textDecoration: 'none' }}>
                                     <Box sx={{
                                         display: 'inline-flex',
                                         alignItems: 'center',
+                                        gap: 0.5,
+                                        px: 2,
+                                        py: 1,
+                                        backgroundColor: 'rgba(46, 125, 50, 0.12)',
+                                        borderRadius: 1,
+                                        color: 'success.dark',
+                                        fontWeight: 500,
+                                        fontSize: { xs: '0.875rem', sm: '0.9375rem' },
+                                        transition: 'all 0.2s',
                                         '&:hover': {
-                                            textDecoration: 'underline',
+                                            backgroundColor: 'rgba(46, 125, 50, 0.2)',
+                                            transform: 'translateX(2px)',
                                         }
                                     }}>
-                                        → 点击查看所有人的结果
+                                        <span>{t('participantForm.viewAllResults').replace('→ ', '')}</span>
+                                        <span style={{ fontSize: '1.1em' }}>→</span>
                                     </Box>
                                 </Link>
                             </Box>
@@ -598,7 +618,7 @@ export default function ParticipantForm({ event }: ParticipantFormProps) {
                                 },
                             }}
                         >
-                            {loading ? '提交中...' : isUpdate ? '更新我的空闲时间' : '提交我的空闲时间'}
+                            {loading ? t('participantForm.submitting') : isUpdate ? t('participantForm.updateTime') : t('participantForm.submitTime')}
                         </Button>
                     </Box>
                 </form>

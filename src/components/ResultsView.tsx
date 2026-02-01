@@ -89,14 +89,6 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
     // Convert slot index to readable time range
     const getSlotTimeRange = (slotIndex: number): string => {
         try {
-            // Helper function to parse time string (HH:mm) to minutes
-            const parseTimeToMinutes = (timeStr: string | null | undefined): number => {
-                if (!timeStr) return 540; // Default 9:00 AM
-                const [hours, minutes] = timeStr.split(':').map(Number);
-                if (isNaN(hours) || isNaN(minutes)) return 540;
-                return hours * 60 + minutes;
-            };
-
             // Parse dates - handle both string and Date objects
             let startDate: Date;
             let endDate: Date;
@@ -130,29 +122,61 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
                 return `时间段 ${slotIndex + 1}`;
             }
 
-            const slotMinutes = event.slotMinutes || 30;
-            // Parse time strings to minutes
-            const dayStartTime = parseTimeToMinutes(event.dayStartTime);
-            const dayEndTime = parseTimeToMinutes(event.dayEndTime);
+            // Calculate slots per day and get time label based on mode
+            let slotsPerDay = 0;
+            let timeLabel = '';
 
-            // Calculate slots per day
-            const startHour = Math.floor(dayStartTime / 60);
-            const startMinute = dayStartTime % 60;
-            const endHour = Math.floor(dayEndTime / 60);
-            const endMinute = dayEndTime % 60;
-            const totalMinutesPerDay = (endHour * 60 + endMinute) - (startHour * 60 + startMinute);
-            const slotsPerDay = Math.ceil(totalMinutesPerDay / slotMinutes);
-
-            if (slotsPerDay <= 0) {
-                console.error('Invalid slotsPerDay:', { dayStartTime, dayEndTime, slotMinutes, slotsPerDay });
+            if (event.mode === 'fullDay') {
+                slotsPerDay = 1;
+                timeLabel = '全天';
+            } else if (event.timeMode === 'period') {
+                slotsPerDay = 3;
+                const labels = ['上午 9-12', '下午 12-18', '晚上 18-22'];
+                const slotInDay = slotIndex % slotsPerDay;
+                timeLabel = labels[slotInDay] || '';
+            } else if (event.timeMode === 'custom' && event.customTimeSlots) {
+                slotsPerDay = event.customTimeSlots.length;
+                const slotInDay = slotIndex % slotsPerDay;
+                const slot = event.customTimeSlots[slotInDay];
+                if (slot) {
+                    timeLabel = `${slot.label} ${slot.startTime}-${slot.endTime}`;
+                }
+            } else if (event.dayStartTime && event.dayEndTime && event.slotMinutes) {
+                // Standard time range mode
+                const [startHour, startMin] = event.dayStartTime.split(':').map(Number);
+                const [endHour, endMin] = event.dayEndTime.split(':').map(Number);
+                const totalMinutes = (endHour * 60 + endMin) - (startHour * 60 + startMin);
+                const slotMinutes = event.slotMinutes;
+                slotsPerDay = Math.ceil(totalMinutes / slotMinutes);
+                
+                const slotInDay = slotIndex % slotsPerDay;
+                const slotStartMinutes = startHour * 60 + startMin + slotInDay * slotMinutes;
+                const slotStartHour = Math.floor(slotStartMinutes / 60);
+                const slotStartMin = slotStartMinutes % 60;
+                const slotEndMinutes = slotStartMinutes + slotMinutes;
+                const slotEndHour = Math.floor(slotEndMinutes / 60);
+                const slotEndMin = slotEndMinutes % 60;
+                
+                timeLabel = `${String(slotStartHour).padStart(2, '0')}:${String(slotStartMin).padStart(2, '0')}-${String(slotEndHour).padStart(2, '0')}:${String(slotEndMin).padStart(2, '0')}`;
+            } else {
+                console.error('Invalid event configuration:', { 
+                    mode: event.mode,
+                    timeMode: event.timeMode,
+                    dayStartTime: event.dayStartTime,
+                    dayEndTime: event.dayEndTime,
+                    slotMinutes: event.slotMinutes,
+                    customTimeSlots: event.customTimeSlots
+                });
                 return `时间段 ${slotIndex + 1}`;
             }
 
-            // Calculate which day and which slot within that day
-            const dayIndex = Math.floor(slotIndex / slotsPerDay);
-            const slotInDay = slotIndex % slotsPerDay;
+            if (slotsPerDay === 0) {
+                console.error('slotsPerDay is 0');
+                return `时间段 ${slotIndex + 1}`;
+            }
 
-            // Calculate the actual date
+            // Calculate which day this slot belongs to
+            const dayIndex = Math.floor(slotIndex / slotsPerDay);
             const slotDate = addDays(startDate, dayIndex);
 
             // Validate the calculated date
@@ -166,23 +190,12 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
                 return `时间段 ${slotIndex + 1}`;
             }
 
-            // Calculate the start time of this slot
-            const slotStartMinutes = dayStartTime + (slotInDay * slotMinutes);
-            const slotStartHour = Math.floor(slotStartMinutes / 60);
-            const slotStartMin = slotStartMinutes % 60;
-
-            // Calculate the end time of this slot
-            const slotEndMinutes = slotStartMinutes + slotMinutes;
-            const slotEndHour = Math.floor(slotEndMinutes / 60);
-            const slotEndMin = slotEndMinutes % 60;
-
-            // Format the date and time manually to avoid locale issues
+            // Format the date
             const month = slotDate.getMonth() + 1;
             const day = slotDate.getDate();
             const dateStr = `${month}月${day}日`;
-            const timeStr = `${String(slotStartHour).padStart(2, '0')}:${String(slotStartMin).padStart(2, '0')}-${String(slotEndHour).padStart(2, '0')}:${String(slotEndMin).padStart(2, '0')}`;
 
-            return `${dateStr} ${timeStr}`;
+            return `${dateStr} ${timeLabel}`;
         } catch (error) {
             console.error('Error formatting slot time:', error, { slotIndex, event });
             return `时间段 ${slotIndex + 1}`;
@@ -280,8 +293,24 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
                 )}
             </Paper>
 
-            <Paper sx={{ mb: 3 }}>
-                <Tabs value={tabValue} onChange={(_, v) => setTabValue(v)}>
+            <Paper 
+                elevation={0}
+                sx={{ 
+                    mb: 3,
+                    borderRadius: 3,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    overflow: 'hidden',
+                }}
+            >
+                <Tabs 
+                    value={tabValue} 
+                    onChange={(_, v) => setTabValue(v)}
+                    sx={{
+                        borderBottom: '1px solid',
+                        borderColor: 'divider',
+                    }}
+                >
                     <Tab label={t('resultsPage.heatmap')} />
                     <Tab label={t('resultsPage.allAvailable')} />
                     <Tab label={t('resultsPage.recommended')} />
@@ -289,22 +318,48 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
             </Paper>
 
             {tabValue === 0 && (
-                <Paper elevation={2} sx={{ p: 3 }}>
-                    <Typography variant="h6" gutterBottom>
+                <Paper 
+                    elevation={0} 
+                    sx={{ 
+                        p: { xs: 2.5, sm: 4 },
+                        borderRadius: 3,
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        background: 'linear-gradient(to bottom, #ffffff, #fafafa)',
+                    }}
+                >
+                    <Typography 
+                        variant="h6" 
+                        gutterBottom
+                        sx={{
+                            fontWeight: 600,
+                            color: 'text.primary',
+                            fontSize: { xs: '1rem', sm: '1.25rem' },
+                        }}
+                    >
                         {t('resultsPage.heatmapTitle')}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    <Typography 
+                        variant="body2" 
+                        color="text.secondary" 
+                        sx={{ mb: { xs: 2, sm: 3 } }}
+                    >
                         {t('resultsPage.heatmapDescription')}
                     </Typography>
-                    <TimeGrid
-                        event={event}
-                        selectedSlots={[]}
-                        onSlotsChange={() => { }}
-                        heatmapData={slotCounts}
-                        maxCount={maxCount}
-                        viewTimezone={viewTimezone}
-                        onSlotClick={handleSlotClick}
-                    />
+                    
+                    {/* 居中显示TimeGrid */}
+                    <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+                        <TimeGrid
+                            event={event}
+                            selectedSlots={[]}
+                            onSlotsChange={() => { }}
+                            heatmapData={slotCounts}
+                            maxCount={maxCount}
+                            viewTimezone={viewTimezone}
+                            onSlotClick={handleSlotClick}
+                        />
+                    </Box>
+                    
                     <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
                         <Typography variant="body2" color="text.secondary">0 {t('resultsPage.people')}</Typography>
                         <Box
@@ -323,8 +378,25 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
             )}
 
             {tabValue === 1 && (
-                <Paper elevation={2} sx={{ p: 3 }}>
-                    <Typography variant="h6" gutterBottom>
+                <Paper 
+                    elevation={0} 
+                    sx={{ 
+                        p: { xs: 2.5, sm: 4 },
+                        borderRadius: 3,
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        background: 'linear-gradient(to bottom, #ffffff, #fafafa)',
+                    }}
+                >
+                    <Typography 
+                        variant="h6" 
+                        gutterBottom
+                        sx={{
+                            fontWeight: 600,
+                            color: 'text.primary',
+                            fontSize: { xs: '1rem', sm: '1.25rem' },
+                        }}
+                    >
                         {t('resultsPage.allAvailableTitle')}
                     </Typography>
                     {commonSlots.length === 0 ? (
@@ -366,11 +438,32 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
             )}
 
             {tabValue === 2 && (
-                <Paper elevation={2} sx={{ p: 3 }}>
-                    <Typography variant="h6" gutterBottom>
+                <Paper 
+                    elevation={0} 
+                    sx={{ 
+                        p: { xs: 2.5, sm: 4 },
+                        borderRadius: 3,
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        background: 'linear-gradient(to bottom, #ffffff, #fafafa)',
+                    }}
+                >
+                    <Typography 
+                        variant="h6" 
+                        gutterBottom
+                        sx={{
+                            fontWeight: 600,
+                            color: 'text.primary',
+                            fontSize: { xs: '1rem', sm: '1.25rem' },
+                        }}
+                    >
                         {t('resultsPage.recommendedTitle')}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    <Typography 
+                        variant="body2" 
+                        color="text.secondary" 
+                        sx={{ mb: { xs: 2, sm: 3 } }}
+                    >
                         {t('resultsPage.recommendedDescription')}
                     </Typography>
                     {recommendedSlots.length === 0 ? (
@@ -422,8 +515,26 @@ export default function ResultsView({ event, responses }: ResultsViewProps) {
                 </Paper>
             )}
 
-            <Paper elevation={2} sx={{ p: 3, mt: 3 }}>
-                <Typography variant="h6" gutterBottom>
+            <Paper 
+                elevation={0} 
+                sx={{ 
+                    p: { xs: 2.5, sm: 4 },
+                    mt: 3,
+                    borderRadius: 3,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    background: 'linear-gradient(to bottom, #ffffff, #fafafa)',
+                }}
+            >
+                <Typography 
+                    variant="h6" 
+                    gutterBottom
+                    sx={{
+                        fontWeight: 600,
+                        color: 'text.primary',
+                        fontSize: { xs: '1rem', sm: '1.25rem' },
+                    }}
+                >
                     {t('resultsPage.participantsList')}
                 </Typography>
                 <List>

@@ -6,6 +6,7 @@ import { Container, Typography, Box, Button, IconButton, CircularProgress } from
 import Link from "next/link";
 import BarChart from "@mui/icons-material/BarChart";
 import ShareIcon from "@mui/icons-material/Share";
+import HomeIcon from "@mui/icons-material/Home";
 import ParticipantForm from "@/components/ParticipantForm";
 import SettingsMenu from "@/components/SettingsMenu";
 import ShareDialog from "@/components/ShareDialog";
@@ -115,6 +116,27 @@ export default function EventPage({ params }: EventPageProps) {
                         )}
                     </Box>
                     <Box sx={{ display: 'flex', gap: 2 }}>
+                        <Link href="/" passHref style={{ textDecoration: 'none' }}>
+                            <Button
+                                variant="outlined"
+                                startIcon={<HomeIcon />}
+                                sx={{
+                                    borderRadius: 2.5,
+                                    px: 3,
+                                    py: 1.25,
+                                    fontWeight: 600,
+                                    borderWidth: 1.5,
+                                    '&:hover': {
+                                        borderWidth: 1.5,
+                                        transform: 'translateY(-2px)',
+                                        boxShadow: '0 4px 12px rgba(26, 173, 25, 0.2)',
+                                    },
+                                    transition: 'all 0.2s ease',
+                                }}
+                            >
+                                {t('home')}
+                            </Button>
+                        </Link>
                         <Button
                             variant="outlined"
                             startIcon={<ShareIcon />}
