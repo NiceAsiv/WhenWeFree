@@ -57,10 +57,14 @@ export default function ShareDialog({ open, onClose, eventId, eventTitle }: Shar
                 },
             }}
         >
-            <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pb: 1 }}>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                    {t(language, 'shareDialog.title')}
-                </Typography>
+            <DialogTitle sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'space-between', 
+                pb: 1,
+                fontWeight: 600,
+            }}>
+                {t(language, 'shareDialog.title')}
                 <IconButton onClick={onClose} size="small">
                     <CloseIcon />
                 </IconButton>

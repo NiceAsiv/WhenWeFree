@@ -6,11 +6,13 @@ import { Container, Typography, Box, IconButton, CircularProgress } from "@mui/m
 import Link from "next/link";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ShareIcon from "@mui/icons-material/Share";
+import PublicIcon from "@mui/icons-material/Public";
 import ResultsView from "@/components/ResultsView";
 import SettingsMenu from "@/components/SettingsMenu";
 import ShareDialog from "@/components/ShareDialog";
 import { useTranslation } from "@/hooks/useTranslation";
 import { Event, Response } from "@/types";
+import { getTimezoneLabel } from '@/lib/timezones';
 
 interface ResultsPageProps {
     params: Promise<{
@@ -59,11 +61,12 @@ export default function ResultsPage({ params }: ResultsPageProps) {
     }
 
     return (
-        <Container maxWidth="xl" sx={{ py: 8 }}>
+        <Container maxWidth="lg" sx={{ py: 8 }}>
             {/* Top Bar with Back, Settings and Share */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Link href={`/e/${eventId}`} passHref style={{ textDecoration: 'none' }}>
                     <IconButton
+                        title={t('backToEvent')}
                         sx={{
                             color: 'text.secondary',
                             '&:hover': {
@@ -92,23 +95,26 @@ export default function ResultsPage({ params }: ResultsPageProps) {
 
             <Box sx={{ mb: 4 }}>
                 <Typography
-                    variant="h3"
+                    variant="h2"
                     component="h1"
-                    gutterBottom
                     sx={{
                         fontWeight: 700,
-                        fontSize: { xs: '2rem', sm: '2.5rem' },
+                        fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' },
+                        mb: 2,
                         background: 'linear-gradient(135deg, #1AAD19 0%, #2BA245 100%)',
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
                         backgroundClip: 'text',
+                        lineHeight: 1.3,
                     }}
                 >
                     {t('resultsPage.title', { title: event.title })}
                 </Typography>
-                <Typography variant="body1" color="text.secondary">
-                    {t('resultsPage.responsesCount', { count: event.responses.length })}
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <Typography variant="body1" color="text.secondary">
+                        {t('resultsPage.responsesCount', { count: event.responses.length })}
+                    </Typography>
+                </Box>
             </Box>
             <ResultsView event={event} responses={event.responses} />
 

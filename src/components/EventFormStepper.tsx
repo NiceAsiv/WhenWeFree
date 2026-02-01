@@ -24,8 +24,10 @@ import {
 } from '@mui/material';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import PublicIcon from '@mui/icons-material/Public';
 import { format, addDays, differenceInDays } from 'date-fns';
 import { useTranslation } from "@/hooks/useTranslation";
+import { TIMEZONES, getCurrentTimezoneOption } from '@/lib/timezones';
 
 export default function EventFormStepper() {
     const { t } = useTranslation();
@@ -43,6 +45,7 @@ export default function EventFormStepper() {
     // Step 1: Basic Info
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
+    const [timezone, setTimezone] = useState(getCurrentTimezoneOption().value);
 
     // Step 2: Mode Selection
     const [mode, setMode] = useState<'timeRange' | 'fullDay'>('timeRange');
@@ -171,7 +174,7 @@ export default function EventFormStepper() {
                 body: JSON.stringify({
                     title: title.trim(),
                     description: description.trim() || undefined,
-                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                    timezone: timezone,
                     startDate,
                     endDate,
                     mode,
@@ -257,6 +260,29 @@ export default function EventFormStepper() {
                                     onChange={(e) => setDescription(e.target.value)}
                                     inputProps={{ maxLength: 200 }}
                                 />
+                            </Box>
+
+                            <Box>
+                                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                    <PublicIcon sx={{ fontSize: 18 }} />
+                                    时区 <span style={{ color: '#FA5151' }}>*</span>
+                                </Typography>
+                                <FormControl fullWidth>
+                                    <Select
+                                        value={timezone}
+                                        onChange={(e) => setTimezone(e.target.value)}
+                                        displayEmpty
+                                    >
+                                        {TIMEZONES.map((tz) => (
+                                            <MenuItem key={tz.value} value={tz.value}>
+                                                {tz.label}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+                                    选择活动所在的时区，所有参与者将看到此时区的时间
+                                </Typography>
                             </Box>
                         </Stack>
                     )}

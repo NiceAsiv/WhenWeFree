@@ -5,13 +5,53 @@ import CalendarMonth from "@mui/icons-material/CalendarMonth";
 import Group from "@mui/icons-material/Group";
 import Schedule from "@mui/icons-material/Schedule";
 import EventAvailable from "@mui/icons-material/EventAvailable";
+import LoginIcon from "@mui/icons-material/Login";
+import DashboardIcon from "@mui/icons-material/Dashboard";
 import Link from "next/link";
 import Image from "next/image";
 import SettingsMenu from "@/components/SettingsMenu";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useApp } from "@/contexts/AppContext";
+import { useEffect, useState } from "react";
 
 export default function Home() {
     const { t } = useTranslation();
+    const { user, setUser } = useApp();
+    const [checkingAuth, setCheckingAuth] = useState(true);
+
+    useEffect(() => {
+        // Check if user is logged in (only once on mount, and only if user is not already set)
+        if (user) {
+            setCheckingAuth(false);
+            return;
+        }
+
+        const checkAuth = async () => {
+            try {
+                const response = await fetch('/api/auth/me');
+                if (response.ok) {
+                    const data = await response.json();
+                    setUser(data.user);
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+            } finally {
+                setCheckingAuth(false);
+            }
+        };
+
+        checkAuth();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // Only run once on mount
+
+    const handleLogout = async () => {
+        try {
+            await fetch('/api/auth/logout', { method: 'POST' });
+            setUser(null);
+        } catch (error) {
+            console.error('Logout failed:', error);
+        }
+    };
 
     return (
         <Box sx={{
@@ -20,8 +60,69 @@ export default function Home() {
                 : 'linear-gradient(180deg, #F1F1F1 0%, #FFFFFF 100%)',
             minHeight: '100vh'
         }}>
-            {/* Settings Menu in top right */}
-            <Box sx={{ position: 'fixed', top: 16, right: 16, zIndex: 1000 }}>
+            {/* Top Bar with Login and Settings */}
+            <Box sx={{ 
+                position: 'fixed', 
+                top: 16, 
+                right: 16, 
+                zIndex: 1000,
+                display: 'flex',
+                gap: 2,
+                alignItems: 'center'
+            }}>
+                {!checkingAuth && (
+                    <>
+                        {user ? (
+                            <>
+                                <Link href="/dashboard" passHref style={{ textDecoration: "none" }}>
+                                    <Button
+                                        variant="outlined"
+                                        startIcon={<DashboardIcon />}
+                                        sx={{
+                                            borderRadius: 2,
+                                            textTransform: 'none',
+                                            borderColor: (theme) => theme.palette.mode === 'dark' ? '#4CAF50' : '#2BA245',
+                                            color: (theme) => theme.palette.mode === 'dark' ? '#4CAF50' : '#2BA245',
+                                            '&:hover': {
+                                                borderColor: (theme) => theme.palette.mode === 'dark' ? '#66BB6A' : '#1B5E20',
+                                                backgroundColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(76, 175, 80, 0.08)' : 'rgba(43, 162, 69, 0.08)',
+                                            },
+                                        }}
+                                    >
+                                        {t('dashboard.title')}
+                                    </Button>
+                                </Link>
+                                <Button
+                                    variant="outlined"
+                                    onClick={handleLogout}
+                                    sx={{
+                                        borderRadius: 2,
+                                        textTransform: 'none',
+                                    }}
+                                >
+                                    {t('auth.logout')}
+                                </Button>
+                            </>
+                        ) : (
+                            <Link href="/login" passHref style={{ textDecoration: "none" }}>
+                                <Button
+                                    variant="contained"
+                                    startIcon={<LoginIcon />}
+                                    sx={{
+                                        borderRadius: 2,
+                                        textTransform: 'none',
+                                        boxShadow: '0px 2px 8px rgba(103, 80, 164, 0.2)',
+                                        '&:hover': {
+                                            boxShadow: '0px 4px 12px rgba(103, 80, 164, 0.3)',
+                                        },
+                                    }}
+                                >
+                                    {t('auth.login')}
+                                </Button>
+                            </Link>
+                        )}
+                    </>
+                )}
                 <SettingsMenu />
             </Box>
 

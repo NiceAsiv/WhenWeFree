@@ -11,6 +11,7 @@ export const translations = {
         copy: '复制',
         copied: '已复制',
         back: '返回',
+        home: '首页',
 
         // Home Page
         homePage: {
@@ -173,7 +174,7 @@ export const translations = {
             selectTimeHint: '点击或拖拽选择时间段，绿色表示已选中',
             selectedSlots: '已选择 {count} 个时间段',
             loadingData: '正在加载已有数据...',
-            foundPrevious: '✓ 已找到你之前的选择，修改后重新提交即可',
+            foundPrevious: '已找到你之前的选择，修改后重新提交即可',
             autoSave: '输入邮箱后自动保存，下次可以继续修改',
             submitTime: '提交我的空闲时间',
             updateTime: '更新我的空闲时间',
@@ -182,6 +183,19 @@ export const translations = {
             updated: '已更新 "{name}" 的空闲时间！',
             viewAllResults: '→ 点击查看所有人的结果',
             nameMinLength: '请输入至少2个字符的昵称',
+            timezoneSettings: '时区设置',
+            selectTimezone: '选择你查看时间的时区',
+            currentTimezone: '当前显示时区',
+            timezoneNotice: '你正在以 <strong>{timezone}</strong> 查看时间。你选择的时间会自动转换为活动时区保存。',
+            fullDay: '全天',
+            morning: '上午 9-12',
+            afternoon: '下午 12-18',
+            evening: '晚上 18-22',
+            errorSelectSlots: '请至少选择一个时间段',
+            errorNameMinLength: '请输入至少2个字符的昵称',
+            errorInvalidEmail: '请输入有效的邮箱地址',
+            errorSubmitFailed: '提交失败',
+            errorSubmitRetry: '提交失败，请重试',
         },
 
         // Share Dialog
@@ -202,6 +216,79 @@ export const translations = {
             chinese: '中文',
             english: 'English',
         },
+
+        // Auth
+        auth: {
+            login: '登录',
+            logout: '退出登录',
+            register: '注册',
+            signIn: '登录',
+            signUp: '注册',
+            email: '邮箱',
+            password: '密码',
+            confirmPassword: '确认密码',
+            forgotPassword: '忘记密码？',
+            noAccount: '没有账号？',
+            hasAccount: '已有账号？',
+            googleSignIn: '使用 Google 登录',
+            emailSignIn: '使用邮箱登录',
+            orDivider: '或',
+            signInTitle: '登录账号',
+            signUpTitle: '创建账号',
+            welcome: '欢迎回来',
+            createAccount: '创建新账号',
+            emailPlaceholder: '输入你的邮箱',
+            passwordPlaceholder: '输入密码',
+            confirmPasswordPlaceholder: '再次输入密码',
+            signInWithEmail: '邮箱登录',
+            signUpWithEmail: '邮箱注册',
+            errors: {
+                emailRequired: '请输入邮箱',
+                emailInvalid: '请输入有效的邮箱地址',
+                passwordRequired: '请输入密码',
+                passwordTooShort: '密码至少需要 6 个字符',
+                passwordNotMatch: '两次输入的密码不一致',
+            },
+        },
+
+        // Dashboard
+        dashboard: {
+            title: '我的活动',
+            myEvents: '我创建的活动',
+            noEvents: '你还没有创建任何活动',
+            createFirst: '创建第一个活动',
+            eventCount: '{count} 个活动',
+            participants: '参与者',
+            responses: '{count} 人回复',
+            viewResults: '查看结果',
+            edit: '编辑',
+            delete: '删除',
+            deleteConfirm: '确定要删除这个活动吗？',
+            deleteSuccess: '活动已删除',
+            createdAt: '创建于',
+        },
+
+        // Not Found
+        notFound: {
+            title: '页面不存在',
+            description: '抱歉，您访问的页面不存在或已被删除。',
+            hint: '请检查网址是否正确，或返回首页。',
+            backToHome: '返回首页',
+        },
+
+        // Errors
+        errors: {
+            loadEventsFailed: '加载活动失败，请刷新页面重试',
+            deleteEventFailed: '删除活动失败，请重试',
+            googleLoginFailed: 'Google 登录失败，请重试',
+            googleLoginNetwork: 'Google 登录失败，请检查网络连接',
+            googleLoginNotAvailable: 'Google 登录功能暂未开放',
+            googleLoginNotLoaded: 'Google 登录服务未加载，请刷新页面重试',
+            googleLoginInitFailed: 'Google 登录初始化失败，请刷新页面重试',
+            loginFailed: '登录失败，请重试',
+            loginNetwork: '登录失败，请检查网络连接',
+            registerFailed: '注册失败，请重试',
+        },
     },
     en: {
         // Common
@@ -215,6 +302,7 @@ export const translations = {
         copy: 'Copy',
         copied: 'Copied',
         back: 'Back',
+        home: 'Home',
 
         // Home Page
         homePage: {
@@ -386,6 +474,19 @@ export const translations = {
             updated: 'Updated "{name}"\'s availability!',
             viewAllResults: '→ Click to view all results',
             nameMinLength: 'Please enter at least 2 characters',
+            timezoneSettings: 'Timezone Settings',
+            selectTimezone: 'Select your viewing timezone',
+            currentTimezone: 'Current timezone',
+            timezoneNotice: 'You are viewing in <strong>{timezone}</strong>. Your selections will be converted to the event timezone.',
+            fullDay: 'Full Day',
+            morning: 'Morning 9-12',
+            afternoon: 'Afternoon 12-18',
+            evening: 'Evening 18-22',
+            errorSelectSlots: 'Please select at least one time slot',
+            errorNameMinLength: 'Please enter at least 2 characters for name',
+            errorInvalidEmail: 'Please enter a valid email address',
+            errorSubmitFailed: 'Submission failed',
+            errorSubmitRetry: 'Submission failed, please try again',
         },
 
         // Share Dialog
@@ -405,6 +506,79 @@ export const translations = {
             language: 'Language',
             chinese: '中文',
             english: 'English',
+        },
+
+        // Auth
+        auth: {
+            login: 'Login',
+            logout: 'Logout',
+            register: 'Register',
+            signIn: 'Sign In',
+            signUp: 'Sign Up',
+            email: 'Email',
+            password: 'Password',
+            confirmPassword: 'Confirm Password',
+            forgotPassword: 'Forgot Password?',
+            noAccount: 'No account?',
+            hasAccount: 'Have an account?',
+            googleSignIn: 'Sign in with Google',
+            emailSignIn: 'Sign in with Email',
+            orDivider: 'or',
+            signInTitle: 'Sign In',
+            signUpTitle: 'Create Account',
+            welcome: 'Welcome Back',
+            createAccount: 'Create New Account',
+            emailPlaceholder: 'Enter your email',
+            passwordPlaceholder: 'Enter password',
+            confirmPasswordPlaceholder: 'Confirm password',
+            signInWithEmail: 'Sign In with Email',
+            signUpWithEmail: 'Sign Up with Email',
+            errors: {
+                emailRequired: 'Email is required',
+                emailInvalid: 'Please enter a valid email',
+                passwordRequired: 'Password is required',
+                passwordTooShort: 'Password must be at least 6 characters',
+                passwordNotMatch: 'Passwords do not match',
+            },
+        },
+
+        // Dashboard
+        dashboard: {
+            title: 'My Events',
+            myEvents: 'Events I Created',
+            noEvents: 'You haven\'t created any events yet',
+            createFirst: 'Create your first event',
+            eventCount: '{count} events',
+            participants: 'Participants',
+            responses: '{count} responses',
+            viewResults: 'View Results',
+            edit: 'Edit',
+            delete: 'Delete',
+            deleteConfirm: 'Are you sure you want to delete this event?',
+            deleteSuccess: 'Event deleted',
+            createdAt: 'Created at',
+        },
+
+        // Not Found
+        notFound: {
+            title: 'Page Not Found',
+            description: 'Sorry, the page you visited does not exist or has been removed.',
+            hint: 'Please check the URL or return to the homepage.',
+            backToHome: 'Back to Home',
+        },
+
+        // Errors
+        errors: {
+            loadEventsFailed: 'Failed to load events, please refresh the page',
+            deleteEventFailed: 'Failed to delete event, please try again',
+            googleLoginFailed: 'Google login failed, please try again',
+            googleLoginNetwork: 'Google login failed, please check your network connection',
+            googleLoginNotAvailable: 'Google login is not available yet',
+            googleLoginNotLoaded: 'Google login service not loaded, please refresh the page',
+            googleLoginInitFailed: 'Failed to initialize Google login, please refresh the page',
+            loginFailed: 'Login failed, please try again',
+            loginNetwork: 'Login failed, please check your network connection',
+            registerFailed: 'Registration failed, please try again',
         },
     },
 };

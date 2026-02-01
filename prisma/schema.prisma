@@ -8,10 +8,28 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  // 添加连接池配置以解决连接重置问题
+  // connection_limit: 最大连接数
+  // pool_timeout: 获取连接的超时时间（秒）
+  // connect_timeout: 建立连接的超时时间（秒）
+}
+
+model User {
+  id            String     @id @default(cuid())
+  email         String     @unique
+  name          String?
+  passwordHash  String?    // for email/password authentication
+  googleId      String?    @unique // for Google OAuth
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  events        Event[]    @relation("UserEvents")
+
+  @@index([email])
+  @@index([googleId])
 }
 
 model Event {
-  id                 String     @id @default(cuid())
+  id                 String     @id
   title              String
   description        String?
   timezone           String     // IANA timezone (e.g., "Asia/Shanghai")
@@ -25,11 +43,14 @@ model Event {
   minDurationMinutes Int?       // minimum meeting duration, for standard mode
   customTimeSlots    Json?      // for custom mode: [{label: "下午 4-5", startTime: "16:00", endTime: "17:00"}]
   adminToken         String     @unique
+  userId             String?    // Creator of the event
+  user               User?      @relation("UserEvents", fields: [userId], references: [id], onDelete: SetNull)
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
   responses          Response[]
 
   @@index([adminToken])
+  @@index([userId])
 }
 
 model Response {

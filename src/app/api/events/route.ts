@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { generateAdminToken } from "@/lib/tokenUtils";
+import { generateAdminToken, generateEventId } from "@/lib/tokenUtils";
+import { getAuthUserId } from "@/lib/auth";
 
 export async function POST(request: Request) {
     try {
+        // Get authenticated user ID (optional - events can be created without login)
+        const userId = await getAuthUserId();
+
         const body = await request.json();
         const {
             title,
@@ -61,12 +65,14 @@ export async function POST(request: Request) {
             }
         }
 
-        // Generate admin token
+        // Generate admin token and event ID
         const adminToken = generateAdminToken();
+        const eventId = generateEventId();
 
         // Create event
         const event = await prisma.event.create({
             data: {
+                id: eventId,
                 title,
                 description: description || null,
                 timezone,
@@ -80,6 +86,7 @@ export async function POST(request: Request) {
                 minDurationMinutes: finalMinDurationMinutes ? parseInt(finalMinDurationMinutes) : null,
                 customTimeSlots: customTimeSlots || null,
                 adminToken,
+                userId: userId || null, // Associate with user if logged in
             },
         });
 

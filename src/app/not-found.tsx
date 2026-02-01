@@ -4,8 +4,11 @@ import { Container, Typography, Box, Button, Paper } from "@mui/material";
 import Link from "next/link";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import HomeIcon from "@mui/icons-material/Home";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function NotFound() {
+    const { t } = useTranslation();
+    
     return (
         <Container maxWidth="md" sx={{ py: 8 }}>
             <Paper
@@ -52,12 +55,12 @@ export default function NotFound() {
                             color: 'text.primary',
                         }}
                     >
-                        页面不存在
+                        {t('notFound.title')}
                     </Typography>
                     <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: 500, mx: 'auto' }}>
-                        抱歉，您访问的页面不存在或已被删除。
+                        {t('notFound.description')}
                         <br />
-                        请检查网址是否正确，或返回首页。
+                        {t('notFound.hint')}
                     </Typography>
                 </Box>
 
@@ -81,7 +84,7 @@ export default function NotFound() {
                                 transition: 'all 0.3s ease',
                             }}
                         >
-                            返回首页
+                            {t('notFound.backToHome')}
                         </Button>
                     </Link>
                 </Box>

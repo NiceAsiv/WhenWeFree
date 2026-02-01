@@ -5,6 +5,7 @@ import { Box, Paper, Typography } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { Event } from '@/types';
 import { format, addDays } from 'date-fns';
+import { toZonedTime, fromZonedTime } from 'date-fns-tz';
 
 interface TimeGridProps {
     event: Event;
@@ -12,6 +13,8 @@ interface TimeGridProps {
     onSlotsChange: (slots: number[]) => void;
     heatmapData?: number[];
     maxCount?: number;
+    viewTimezone?: string; // 用户选择的查看时区
+    onSlotClick?: (slotIndex: number) => void; // 点击时间槽的回调
 }
 
 export default function TimeGrid({
@@ -20,16 +23,38 @@ export default function TimeGrid({
     onSlotsChange,
     heatmapData,
     maxCount,
+    viewTimezone,
+    onSlotClick,
 }: TimeGridProps) {
     const theme = useTheme();
     const isDark = theme.palette.mode === 'dark';
     const [isDragging, setIsDragging] = useState(false);
     const [dragMode, setDragMode] = useState<'select' | 'deselect'>('select');
 
+    // 使用的时区，默认为活动时区
+    const displayTimezone = viewTimezone || event.timezone;
+    const isTimezoneConverted = displayTimezone !== event.timezone;
+
     // Calculate grid dimensions
     const startDate = new Date(event.startDate);
     const endDate = new Date(event.endDate);
     const daysDiff = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+
+    // 计算日期标签，考虑时区转换
+    const dayLabels = useMemo(() => {
+        return Array.from({ length: daysDiff }).map((_, i) => {
+            const currentDay = addDays(startDate, i);
+            // 如果需要时区转换，将日期转换到显示时区
+            const dateToFormat = isTimezoneConverted 
+                ? toZonedTime(currentDay, displayTimezone)
+                : currentDay;
+            
+            return {
+                date: format(dateToFormat, 'M/d'),
+                day: format(dateToFormat, 'EEE'),
+            };
+        });
+    }, [startDate, daysDiff, displayTimezone, isTimezoneConverted]);
 
     // Calculate slots per day based on mode
     const { slotsPerDay, slotLabels } = useMemo(() => {
@@ -57,17 +82,30 @@ export default function TimeGrid({
             const [endHour, endMin] = event.dayEndTime.split(':').map(Number);
             const totalMinutes = (endHour * 60 + endMin) - (startHour * 60 + startMin);
             const count = Math.floor(totalMinutes / event.slotMinutes);
+            
             const labels = Array.from({ length: count }).map((_, i) => {
                 const minutes = startHour * 60 + startMin + i * event.slotMinutes!;
-                const hour = Math.floor(minutes / 60);
-                const min = minutes % 60;
+                let hour = Math.floor(minutes / 60);
+                let min = minutes % 60;
+                
+                // 如果需要时区转换，转换时间
+                if (isTimezoneConverted) {
+                    // 创建活动时区的时间
+                    const eventDate = new Date();
+                    eventDate.setHours(hour, min, 0, 0);
+                    // 转换到显示时区
+                    const zonedDate = toZonedTime(eventDate, displayTimezone);
+                    hour = zonedDate.getHours();
+                    min = zonedDate.getMinutes();
+                }
+                
                 return `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
             });
             return { slotsPerDay: count, slotLabels: labels };
         }
 
         return { slotsPerDay: 0, slotLabels: [] };
-    }, [event]);
+    }, [event, displayTimezone, isTimezoneConverted]);
 
     const toggleSlot = useCallback((slotIndex: number) => {
         const isSelected = selectedSlots.includes(slotIndex);
@@ -79,6 +117,12 @@ export default function TimeGrid({
     }, [selectedSlots, onSlotsChange]);
 
     const handleMouseDown = (slotIndex: number) => {
+        // If in heatmap mode and onSlotClick is provided, just trigger the click
+        if (heatmapData && onSlotClick) {
+            onSlotClick(slotIndex);
+            return;
+        }
+        
         setIsDragging(true);
         const isSelected = selectedSlots.includes(slotIndex);
         setDragMode(isSelected ? 'deselect' : 'select');
@@ -86,6 +130,12 @@ export default function TimeGrid({
     };
 
     const handleTouchStart = (slotIndex: number) => {
+        // If in heatmap mode and onSlotClick is provided, just trigger the click
+        if (heatmapData && onSlotClick) {
+            onSlotClick(slotIndex);
+            return;
+        }
+        
         // For touch devices, just toggle the slot without dragging
         toggleSlot(slotIndex);
     };
@@ -168,7 +218,7 @@ export default function TimeGrid({
                         minWidth: { xs: 70, sm: event.mode === 'fullDay' ? 60 : 100 },
                         flexShrink: 0,
                     }}>
-                        <Box sx={{ height: { xs: 44, sm: 48 }, mb: 0.5 }} /> {/* Header spacer */}
+                        <Box sx={{ height: { xs: 50, sm: 56 }, mb: 0.5 }} /> {/* Header spacer */}
                         {slotLabels.map((label, i) => (
                             <Box
                                 key={i}
@@ -204,27 +254,41 @@ export default function TimeGrid({
                                 {/* Day header */}
                                 <Box
                                     sx={{
-                                        height: { xs: 44, sm: 48 },
+                                        height: { xs: 50, sm: 56 },
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         fontWeight: 600,
-                                        fontSize: { xs: '0.8125rem', sm: '0.9375rem' },
                                         borderBottom: '2px solid',
                                         borderColor: 'divider',
                                         mb: 0.5,
+                                        py: 0.75,
                                     }}
                                 >
-                                    <div>
-                                        <div style={{ fontWeight: 600 }}>{format(currentDay, 'EEE')}</div>
-                                        <div style={{
-                                            fontSize: window.innerWidth < 600 ? '0.75rem' : '0.8125rem',
-                                            color: isDark ? '#aaa' : '#888',
-                                            fontWeight: 500
+                                    <Box sx={{ 
+                                        display: 'flex', 
+                                        flexDirection: 'column', 
+                                        alignItems: 'center', 
+                                        justifyContent: 'center',
+                                        gap: 0.25,
+                                    }}>
+                                        <Typography sx={{ 
+                                            fontWeight: 700,
+                                            fontSize: { xs: '0.9375rem', sm: '1rem' },
+                                            color: 'text.primary',
+                                            lineHeight: 1.2,
                                         }}>
-                                            {format(currentDay, 'M/d')}
-                                        </div>
-                                    </div>
+                                            {dayLabels[dayIndex].date}
+                                        </Typography>
+                                        <Typography sx={{
+                                            fontSize: { xs: '0.6875rem', sm: '0.75rem' },
+                                            color: 'text.secondary',
+                                            fontWeight: 500,
+                                            lineHeight: 1.2,
+                                        }}>
+                                            {dayLabels[dayIndex].day}
+                                        </Typography>
+                                    </Box>
                                 </Box>
 
                                 {/* Time slots for this day */}
