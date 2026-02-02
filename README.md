@@ -8,11 +8,11 @@
 ## 技术栈
 
 - Node.js: 24 lts and above
-- **Frontend**: Next.js 14 (App Router) + React 18 + TypeScript
-- **UI Framework**: Material-UI (MUI) + Tailwind CSS
-- **Database**: PostgreSQL with Prisma ORM
-- **Authentication**: Cookie-based sessions + Google OAuth 2.0
-- **Utilities**: date-fns for timezone handling, google-auth-library for OAuth
+- Frontend: Next.js 14 (App Router) + React 18 + TypeScript
+- UI Framework: Material-UI (MUI) + Tailwind CSS
+- Database: PostgreSQL with Prisma ORM
+- Authentication: Cookie-based sessions + Google OAuth 2.0
+- Utilities: date-fns for timezone handling, google-auth-library for OAuth
 
 ## 功能特性
 ✅ 创建活动并生成可分享链接  
@@ -20,10 +20,10 @@
 - ✅ 以热力图形式展示各时间段可用人数  
 - ✅ 自动计算并推荐共同可用时间段  
 - ✅ 支持不同时区的统一处理  
-- ✅ **用户认证系统**
+- ✅ 用户认证系统
   - 邮箱密码注册/登录
   - Google OAuth 登录（可选配置）
-- ✅ **用户 Dashboard**（管理个人创建的活动）
+- ✅ 用户 Dashboard（管理个人创建的活动）
 - ✅ 响应式布局，适配桌面端与移动端
 - ✅ HarmonyOS Sans 字体支持*（管理个人创建的活动）
 - 响应式布局，适配桌面端与移动端
@@ -65,7 +65,7 @@ DATABASE_URL="postgresql://username:password@localhost:5432/whenwefree?schema=pu
 # GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth/google/callback
 ```
 
-**注意**：
+注意：
 - 如果未配置 Google OAuth，点击 Google 登录按钮时会提示"Google 登录功能暂未开放"
 - 用户仍然可以使用邮箱密码方式注册和登录
 
@@ -97,6 +97,8 @@ npx prisma migrate dev --name init
 ```bash
 npm run dev
 ```
+项目结构如下：
+```
 login/             # 登录页面
 │   │   ├── dashboard/         # 用户仪表盘
 │   │   ├── new/               # 创建活动
@@ -124,12 +126,6 @@ login/             # 登录页面
 │   │   ├── ResultsView.tsx    # 结果展示
 │   │   └── ThemeRegistry.tsx  # Material-UI 主题
 │   ├── lib/                   # 工具库，推荐使用 Supabase 或 Neon）
-   - `NEXT_PUBLIC_GOOGLE_CLIENT_ID`（可选 - Google OAuth 客户端 ID）
-   - `GOOGLE_CLIENT_SECRET`（可选 - Google OAuth 客户端密钥）
-   - `GOOGLE_REDIRECT_URI`（可选 - 生产环境的回调 URL，如 `https://yourdomain.com/api/auth/google/callback`）
-4. 部署
-
-**注意**：生产环境的 Google OAuth 回调 URL 必须使用 HTTPS。── types/                 # TypeScript 类型定义
 ├── prisma/
 │   └── schema.prisma          # 数据库模型
 └── public/                    # 静态资源
@@ -140,6 +136,7 @@ login/             # 登录页面
 ### Vercel (推荐)
 
 1. 推送代码到 GitHub
+```
 pnpm run build
 pnpm start
 ```
@@ -148,15 +145,15 @@ pnpm start
 
 ### Google 登录相关
 
-**Q: Google 登录按钮点击后提示"Google 登录功能暂未开放"？**  
+Q: Google 登录按钮点击后提示"Google 登录功能暂未开放"？
 A: 这是因为未配置 Google OAuth 凭据。参考 [GOOGLE_OAUTH_SETUP.md](./GOOGLE_OAUTH_SETUP.md) 配置后即可使用。
 
-**Q: 不想使用 Google 登录，如何禁用？**  
+Q: 不想使用 Google 登录，如何禁用？
 A: 保持 `.env` 文件中 Google OAuth 相关配置为注释状态即可。用户仍可使用邮箱密码方式登录。
 
 ### 数据库相关
 
-**Q: 如何连接远程数据库？**  
+Q: 如何连接远程数据库？
 A: 修改 `.env` 中的 `DATABASE_URL`，推荐使用 Supabase、Neon 或 Railway 等云数据库服务。
 
 ## 相关文档
@@ -166,15 +163,3 @@ A: 修改 `.env` 中的 `DATABASE_URL`，推荐使用 Supabase、Neon 或 Railwa
    - `NEXT_PUBLIC_GOOGLE_CLIENT_ID`（Google OAuth 客户端 ID）
    - `GOOGLE_CLIENT_SECRET`（Google OAuth 客户端密钥）
    - `GOOGLE_REDIRECT_URI`（生产环境的回调 URL）
-4. 部署
-
-### 自托管
-
-```bash
-npm run build
-npm start
-```
-
-## License
-
-MIT
